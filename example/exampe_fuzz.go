@@ -1,0 +1,3 @@
+//+build gofuzz
+
+package example
