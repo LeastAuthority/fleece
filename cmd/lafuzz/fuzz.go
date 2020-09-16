@@ -44,7 +44,6 @@ func runFuzz(cmd *cobra.Command, args []string) error {
 			"go-fuzz %s %s %s -- -procs=1 ",
 			repoRoot, pkgPath, fuzzFuncName, build,
 		), " ")
-	fmt.Println(dockerArgs)
 	dockerCmd := exec.Command("docker", dockerArgs...)
 	dockerCmd.Dir = repoRoot
 	dockerCmd.Stdout = os.Stdout
