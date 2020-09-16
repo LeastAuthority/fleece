@@ -10,9 +10,9 @@ import (
 	"github.com/leastauthority/lafuzz/fuzzing"
 )
 
-func TestFuzzExample(t *testing.T) {
+func TestFuzzBuggyFunc(t *testing.T) {
 	_, panics, _ := fuzzing.
-		MustNewCrasherIterator(FuzzExample).
+		MustNewCrasherIterator(FuzzBuggyFunc).
 		TestFailingLimit(t, 1000)
 
 	require.Zero(t, panics)

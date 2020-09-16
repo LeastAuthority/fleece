@@ -21,11 +21,13 @@ var (
 	}
 
 	buildCorpus bool
+	procs       int
 )
 
 func init() {
 	rootCmd.AddCommand(cmdFuzz)
 	cmdFuzz.Flags().BoolVar(&buildCorpus, "build-corpus", false, "if true, builds corpus before running (default: false)")
+	cmdFuzz.Flags().IntVar(&procs, "procs", 1, "number of processors to use (passed to go-fuzz's -procs flag)")
 }
 
 // TODO: stop container on exit!
@@ -44,7 +46,7 @@ func runFuzz(cmd *cobra.Command, args []string) error {
 		"--name", name,
 		"--entrypoint", "/go-fuzz.sh",
 		"-v", fmt.Sprintf("%s:/tmp/fuzzing", repoRoot),
-		"go-fuzz", pkgPath, fuzzFuncName, build, "--", "-procs=1",
+		"go-fuzz", pkgPath, fuzzFuncName, build, "--", "-procs", fmt.Sprint(procs),
 	}
 
 	if err := runContainer(repoRoot, runArgs); err != nil {

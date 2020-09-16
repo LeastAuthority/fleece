@@ -15,7 +15,7 @@ func PanickyFunc(input []byte) ([]byte, error) {
 
 	switch {
 	case v.field1 > 3 && v.field1 > 100:
-		panic(fmt.Sprintf("panic field1: %s", v.field1))
+		panic(fmt.Sprintf("panic field1: %d", v.field1))
 	default:
 		return json.Marshal(v)
 	}

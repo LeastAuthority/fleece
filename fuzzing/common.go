@@ -169,7 +169,7 @@ func getWorkdir(name string) (string, error) {
 		return "", err
 	}
 
-	return filepath.Join(modPath, "fuzzing", "workdirs", name), nil
+	return filepath.Join(modPath, "lafuzz", "workdirs", name), nil
 }
 
 func getModPath(importPath string) (string, error) {

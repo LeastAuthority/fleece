@@ -23,7 +23,7 @@ func init() {
 func runTriage(cmd *cobra.Command, args []string) error {
 	pkgName := args[0]
 	fuzzFuncName := args[1]
-	testArgsStr := fmt.Sprintf("test -v -run Test%s %s", fuzzFuncName, pkgName)
+	testArgsStr := fmt.Sprintf("test -tags gofuzz -v -run Test%s %s", fuzzFuncName, pkgName)
 	testArgs := strings.Split(testArgsStr, " ")
 
 	testCmd := exec.Command("go", testArgs...)
