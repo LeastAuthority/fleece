@@ -6,19 +6,21 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"reflect"
 	"strings"
 
 	"github.com/spf13/cobra"
 )
 
-const defaultRoot = "lafuzz"
+const (
+	defaultRoot = "lafuzz"
+	pkgPath = "github.com/leastauthority/lafuzz/cmd/lafuzz"
+)
 
 var (
 	cmdInit = &cobra.Command{
-		Use:  "init [output dir]",
+		Use:   "init [output dir]",
 		Short: "Initialize lafuzz into output dir; defaults to `$(pwd)/lafuzz`.",
-		RunE: runInit,
+		RunE:  runInit,
 	}
 	//cmdFuzz = &cobra.Command{
 	//	Use: "fuzz <pkg> <fuzz function>,
@@ -26,10 +28,10 @@ var (
 	//  RunE: runFuzz,
 	//}
 	cmdTriage = &cobra.Command{
-		Use:  "triage <pkg> <fuzz function>",
+		Use:   "triage <pkg> <fuzz function>",
 		Short: "Triage tests known crashing inputs and prints a summary.",
-		Args: cobra.ExactArgs(2),
-		RunE: runTriage,
+		Args:  cobra.ExactArgs(2),
+		RunE:  runTriage,
 	}
 )
 
@@ -38,6 +40,20 @@ func init() {
 }
 
 func runInit(cmd *cobra.Command, args []string) error {
+	if err := makeAllWorkdirsDir(args); err != nil {
+		return err
+	}
+
+	goCmd := exec.Command("go", "get", pkgPath)
+	goCmd.Env = append(os.Environ(), "GO111MDOULE=off")
+	if stdout, err := goCmd.CombinedOutput(); err != nil {
+		fmt.Print(string(stdout))
+		return err
+	}
+	return nil
+}
+
+func makeAllWorkdirsDir(args []string) error {
 	var outputRoot, workdirs string
 	if len(args) > 0 {
 		outputRoot = args[0]
@@ -59,14 +75,6 @@ func runInit(cmd *cobra.Command, args []string) error {
 	if err := ioutil.WriteFile(gitkeep, nil, 0644); err != nil {
 		return err
 	}
-
-	pkgPath := fmt.Sprintf("%s", getPkgPath())
-	goCmd := exec.Command("go", "get", pkgPath)
-	goCmd.Env = []string{"GO111MDOULE=off"}
-	if stdout, err := goCmd.CombinedOutput(); err != nil {
-		fmt.Print(string(stdout))
-		return err
-	}
 	return nil
 }
 
@@ -81,8 +89,4 @@ func runTriage(cmd *cobra.Command, args []string) error {
 	testCmd.Stderr = os.Stderr
 
 	return testCmd.Run()
-}
-
-func getPkgPath() string {
-	return reflect.ValueOf(getPkgPath).Type().PkgPath()
 }
