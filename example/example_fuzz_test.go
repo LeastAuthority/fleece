@@ -12,7 +12,7 @@ import (
 
 func TestFuzzExample(t *testing.T) {
 	_, panics, _ := fuzzing.
-		MustNewCrasherIteratorFor(FuzzExample).
+		MustNewCrasherIterator(FuzzExample).
 		TestFailingLimit(t, 1000)
 
 	require.Zero(t, panics)

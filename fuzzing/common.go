@@ -44,7 +44,7 @@ type FuzzFunc func([]byte) int
 type RecoverCallback func(panicMsg string)
 
 // NewCrasherIteratorFor returns an iterator for crashers that lazily loads	their inputs and outputs.
-func NewCrasherItertorFor(fuzzFunc FuzzFunc) (*CrasherIterator, error) {
+func NewCrasherItertor(fuzzFunc FuzzFunc) (*CrasherIterator, error) {
 	name := getFuncName(fuzzFunc)
 
 	workdir, err := getWorkdir(name)
@@ -64,9 +64,9 @@ func NewCrasherItertorFor(fuzzFunc FuzzFunc) (*CrasherIterator, error) {
 	}, nil
 }
 
-// MustNewCrasherIteratorFor returns an iterator for crashers but panics if an error occurs.
-func MustNewCrasherIteratorFor(fuzzFunc FuzzFunc) *CrasherIterator {
-	iter, err := NewCrasherItertorFor(fuzzFunc)
+// MustNewCrasherIterator returns an iterator for crashers but panics if an error occurs.
+func MustNewCrasherIterator(fuzzFunc FuzzFunc) *CrasherIterator {
+	iter, err := NewCrasherItertor(fuzzFunc)
 	if err != nil {
 		panic(err)
 	}
@@ -128,7 +128,7 @@ func (iter *CrasherIterator) Next() (next *Crasher, done bool, err error) {
 // TestFailingLimit tests each crasher's input against its respective fuzz
 //	function until it sees `limit` failing inputs
 func (iter CrasherIterator) TestFailingLimit(t *testing.T, limit int) (_ *Crasher, panics int, total int) {
-	crasherIterator, err := NewCrasherItertorFor(iter.fuzzFunc)
+	crasherIterator, err := NewCrasherItertor(iter.fuzzFunc)
 	require.NoError(t, err)
 
 	var done, didPanic bool
