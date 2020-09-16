@@ -11,7 +11,7 @@ import (
 
 var cmdTriage = &cobra.Command{
 	Use:   "triage <pkg> <fuzz function>",
-	Short: "Triage tests known crashing inputs and prints a summary.",
+	Short: "tests known crashing inputs and prints a summary.",
 	Args:  cobra.ExactArgs(2),
 	RunE:  runTriage,
 }

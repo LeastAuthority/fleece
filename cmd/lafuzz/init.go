@@ -22,7 +22,7 @@ const (
 var (
 	cmdInit = &cobra.Command{
 		Use:   "init [output dir]",
-		Short: "Initialize lafuzz into output dir (default: `$(pwd)/lafuzz`). Also builds go-fuzz docker image.",
+		Short: "initialize lafuzz into output dir (default: $(pwd)/lafuzz); add config file (default: .lafuzz.yaml); build go-fuzz docker image.",
 		RunE:  runInit,
 	}
 
@@ -30,7 +30,7 @@ var (
 )
 
 func init() {
-	rootCmd.AddCommand(cmdInit, cmdTriage)
+	rootCmd.AddCommand(cmdInit)
 	cmdInit.Flags().BoolVar(&noCache, "no-cache", false, "passes --no-cache to docker build")
 }
 
