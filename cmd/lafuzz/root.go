@@ -28,8 +28,8 @@ func Execute() {
 }
 
 func init() {
-  //cobra.OnInitialize(initConfig)
-  //rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $(pwd)/.lafuzz.yaml)")
+  cobra.OnInitialize(initConfig)
+  rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $(pwd)/.lafuzz.yaml)")
 }
 
 
@@ -47,6 +47,7 @@ func initConfig() {
 
     // Search config in pwd directory with name ".cmd" (without extension).
     viper.AddConfigPath(pwd)
+  	viper.SetConfigType("yaml")
     viper.SetConfigName(".lafuzz")
   }
 

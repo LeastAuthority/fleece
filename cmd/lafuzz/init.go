@@ -9,52 +9,28 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+
+	"github.com/leastauthority/lafuzz/cmd/config"
+	"github.com/leastauthority/lafuzz/docker"
 )
 
 const (
 	defaultRoot = "lafuzz"
-	pkgPath = "github.com/leastauthority/lafuzz/cmd/lafuzz"
 )
 
-var (
-	cmdInit = &cobra.Command{
-		Use:   "init [output dir]",
-		Short: "Initialize lafuzz into output dir; defaults to `$(pwd)/lafuzz`.",
-		RunE:  runInit,
-	}
-	//cmdFuzz = &cobra.Command{
-	//	Use: "fuzz <pkg> <fuzz function>,
-	//  Args: cobra.ExactArgs(2),
-	//  RunE: runFuzz,
-	//}
-	cmdTriage = &cobra.Command{
-		Use:   "triage <pkg> <fuzz function>",
-		Short: "Triage tests known crashing inputs and prints a summary.",
-		Args:  cobra.ExactArgs(2),
-		RunE:  runTriage,
-	}
-)
+var cmdInit = &cobra.Command{
+	Use:   "init [output dir]",
+	Short: "Initialize lafuzz into output dir; defaults to `$(pwd)/lafuzz`.",
+	RunE:  runInit,
+}
 
 func init() {
 	rootCmd.AddCommand(cmdInit, cmdTriage)
 }
 
 func runInit(cmd *cobra.Command, args []string) error {
-	if err := makeAllWorkdirsDir(args); err != nil {
-		return err
-	}
-
-	goCmd := exec.Command("go", "get", pkgPath)
-	goCmd.Env = append(os.Environ(), "GO111MDOULE=off")
-	if stdout, err := goCmd.CombinedOutput(); err != nil {
-		fmt.Print(string(stdout))
-		return err
-	}
-	return nil
-}
-
-func makeAllWorkdirsDir(args []string) error {
-	var outputRoot, workdirs string
+	var outputRoot string
 	if len(args) > 0 {
 		outputRoot = args[0]
 	} else {
@@ -64,7 +40,27 @@ func makeAllWorkdirsDir(args []string) error {
 		}
 		outputRoot = filepath.Join(pwd, defaultRoot)
 	}
-	workdirs = filepath.Join(outputRoot, "workdirs")
+
+	if err := makeAllWorkdirsDir(outputRoot); err != nil {
+		return err
+	}
+
+	if err := docker.RestoreAssets(outputRoot, "docker"); err != nil {
+		return err
+	}
+
+	viper.Set(config.RepoRoot, outputRoot)
+	if err := viper.WriteConfig(); err != nil {
+		return err
+	}
+
+	contextDir := filepath.Join(outputRoot, "docker")
+	dockerfile := filepath.Join(contextDir, "go-fuzz.dockerfile")
+	return buildDocker(contextDir, dockerfile)
+}
+
+func makeAllWorkdirsDir(outputRoot string) error {
+	workdirs := filepath.Join(outputRoot, "workdirs")
 
 	// NB: might need to be more permissive.
 	if err := os.MkdirAll(workdirs, 0755); err != nil {
@@ -78,15 +74,11 @@ func makeAllWorkdirsDir(args []string) error {
 	return nil
 }
 
-func runTriage(cmd *cobra.Command, args []string) error {
-	pkgName := args[0]
-	fuzzFuncName := args[1]
-	testArgsStr := fmt.Sprintf("test -v -run Test%s %s", fuzzFuncName, pkgName)
-	testArgs := strings.Split(testArgsStr, " ")
-
-	testCmd := exec.Command("go", testArgs...)
-	testCmd.Stdout = os.Stdout
-	testCmd.Stderr = os.Stderr
-
-	return testCmd.Run()
+func buildDocker(contextDir, dockerfile string) error {
+	argsStr := fmt.Sprintf("build -t go-fuzz -f %s %s", dockerfile, contextDir)
+	args := strings.Split(argsStr, " ")
+	cmd := exec.Command("docker", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }
