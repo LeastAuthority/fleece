@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -15,10 +16,10 @@ import (
 
 var (
 	cmdFuzz = &cobra.Command{
-		Use:  "fuzz <pkg> <fuzz function>",
+		Use:   "fuzz <pkg> <fuzz function>",
 		Short: "start a fuzzing container for the specified fuzz function (blocking)",
-		Args: cobra.ExactArgs(2),
-		RunE: runFuzz,
+		Args:  cobra.ExactArgs(2),
+		RunE:  runFuzz,
 	}
 
 	buildCorpus bool
@@ -40,7 +41,8 @@ func runFuzz(cmd *cobra.Command, args []string) error {
 		build = "-b"
 	}
 
-	name := fmt.Sprintf("%s_%s", filepath.Base(pkgPath), fuzzFuncName)
+	// TODO: factor out
+	name := containerName(pkgPath, fuzzFuncName)
 	runArgs := []string{
 		"--rm", "-d",
 		"--name", name,
@@ -56,8 +58,30 @@ func runFuzz(cmd *cobra.Command, args []string) error {
 	sigC := make(chan os.Signal, 1)
 	signal.Notify(sigC, os.Interrupt, os.Kill)
 
+	ctx, cancel := context.WithCancel(context.Background())
+	// TODO: use docker engine api
+	go func() {
+		logArgs := []string{"logs", "-f", name}
+		logCmd := exec.Command("docker", logArgs...)
+		logCmd.Stdout = os.Stdout
+		logCmd.Stderr = os.Stderr
+		if err := logCmd.Start(); err != nil {
+			panic(err)
+		}
+		for {
+			select {
+			case <-ctx.Done():
+				if err := logCmd.Process.Kill(); err != nil {
+					panic(err)
+				}
+			default:
+			}
+		}
+	}()
+
 	// Wait for interrupt / kill signal
 	_ = <-sigC
+	cancel()
 
 	// NB: false hope that progress is happening
 	fmt.Printf("Shutting down gracefully...")
@@ -73,6 +97,11 @@ func runFuzz(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+func containerName(pkgPath, fuzzFuncName string) string {
+	return fmt.Sprintf("%s_%s", filepath.Base(pkgPath), fuzzFuncName)
+}
+
+// TODO: move to docker package
 func runContainer(cwd string, args []string) error {
 	args = append([]string{"run"}, args...)
 	dockerCmd := exec.Command("docker", args...)
@@ -82,6 +111,7 @@ func runContainer(cwd string, args []string) error {
 	return dockerCmd.Run()
 }
 
+// TODO: move to docker package
 func stopContainer(name string) error {
 	cmd := exec.Command("docker", "stop", name)
 	cmd.Stdout = os.Stdout
