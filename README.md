@@ -66,7 +66,7 @@ Once you've discovered some crashing inputs you can look through their stack tra
 It's possible that over the course of fuzzing you may discover many thousands of crashing inputs.
 The convention here is to tackle these one at a time.
 
-To debug, the convention here is to add a "triage test" which will run the crashing inputs back through the fuzz function that produced them to see if they're still crashing.
+To debug, add a "triage test" which will run the crashing inputs back through the fuzz function that produced them to see if they're still crashing.
 This also has the benefit of acting as a regression test when combined with a with a simple assertion at all inputs are no longer crashing, and retaining the crashers in version control.
 
 Here's the triage test corresponding with our example above:
