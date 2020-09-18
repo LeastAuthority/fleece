@@ -1,18 +1,16 @@
 package fuzzing
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
-	"runtime"
 	"testing"
 
-	"golang.org/x/tools/go/packages"
-
 	"github.com/stretchr/testify/require"
+
+	"github.com/leastauthority/lafuzz/internal"
 )
 
 // Fuzz constants for go-fuzz to use when returning from the Fuzz func
@@ -45,13 +43,8 @@ type RecoverCallback func(panicMsg string)
 
 // NewCrasherIteratorFor returns an iterator for crashers that lazily loads	their inputs and outputs.
 func NewCrasherItertor(fuzzFunc FuzzFunc) (*CrasherIterator, error) {
-	name := getFuncName(fuzzFunc)
-
-	workdir, err := getWorkdir(name)
-	if err != nil {
-		return nil, err
-	}
-
+	name := internal.GetFuncName(fuzzFunc)
+	workdir := GetWorkdir(name)
 	crashersDir := filepath.Join(workdir, "crashers")
 	crasherInfos, err := ioutil.ReadDir(crashersDir)
 	if err != nil {
@@ -131,6 +124,7 @@ func (iter CrasherIterator) TestFailingLimit(t *testing.T, limit int) (_ *Crashe
 	crasherIterator, err := NewCrasherItertor(iter.fuzzFunc)
 	require.NoError(t, err)
 
+	// TODO: parallelize
 	var done, didPanic bool
 	var firstCrasher, crasher *Crasher
 	for !done && panics < limit {
@@ -162,50 +156,18 @@ func (iter CrasherIterator) TestFailingLimit(t *testing.T, limit int) (_ *Crashe
 	return firstCrasher, panics, total
 }
 
-func getWorkdir(name string) (string, error) {
+func GetWorkdir(name string) string {
 	pkgPath := reflect.TypeOf(FuzzNormal).PkgPath()
-	modPath, err := getModPath(pkgPath)
+	modPath, err := internal.GetModPath(pkgPath)
 	if err != nil {
-		return "", err
+		// NB: I'm pretty sure this shouldn't be possible
+		panic(err)
 	}
 
-	return filepath.Join(modPath, "lafuzz", "workdirs", name), nil
+	return filepath.Join(modPath, "lafuzz", "workdirs", name)
 }
 
-func getModPath(importPath string) (string, error) {
-	mode := packages.NeedName | packages.NeedModule
-	pkgConfig := &packages.Config{Mode: mode}
-	pkgs, err := packages.Load(pkgConfig, importPath)
-	if err != nil {
-		return "", err
-	}
-	if len(pkgs) > 1 {
-		return "", errors.New(fmt.Sprintf(
-			"more than one package matched pattern %q",
-			importPath,
-		))
-	}
-
-	pkg := pkgs[0]
-	if pkg.Errors != nil || len(pkg.Errors) != 0 {
-		errCount := packages.PrintErrors(pkgs)
-		return "", errors.New(fmt.Sprintf(
-			"%d errors encountered while loading package with import path %q",
-			errCount, importPath,
-		))
-	}
-
-	mod := pkg.Module
-	if mod == nil {
-		return "", errors.New(fmt.Sprintf(
-			"unable to load module for package at import path %q",
-			importPath,
-		))
-	}
-
-	return mod.Dir, nil
+func GetCrashersDir(name string) string {
+	return filepath.Join(GetWorkdir(name), "crashers")
 }
 
-func getFuncName(f FuzzFunc) string {
-	return filepath.Ext(runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name())[1:]
-}

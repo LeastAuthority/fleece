@@ -26,7 +26,6 @@ var (
 )
 
 func init() {
-	rootCmd.AddCommand(cmdFuzz)
 	cmdFuzz.Flags().BoolVar(&buildCorpus, "build-corpus", false, "if true, builds corpus before running (default: false)")
 	cmdFuzz.Flags().IntVar(&procs, "procs", 1, "number of processors to use (passed to go-fuzz's -procs flag)")
 }

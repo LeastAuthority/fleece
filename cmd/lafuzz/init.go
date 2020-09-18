@@ -4,14 +4,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	"github.com/leastauthority/lafuzz/cmd/config"
+	"github.com/leastauthority/lafuzz/cmd/lafuzz/env"
 	"github.com/leastauthority/lafuzz/docker"
 )
 
@@ -21,17 +20,18 @@ const (
 
 var (
 	cmdInit = &cobra.Command{
-		Use:   "init [output dir]",
-		Short: "initialize lafuzz into output dir (default: $(pwd)/lafuzz); add config file (default: .lafuzz.yaml); build go-fuzz docker image.",
+		Use:   "init [output-dir]",
+		Short: "initialize lafuzz into repo",
+		Long:  "Copies supporting files into output-dir (default: $(pwd)/lafuzz); add config file (default: .lafuzz.yaml); build go-fuzz docker image",
+		Args:  cobra.MaximumNArgs(1),
 		RunE:  runInit,
 	}
 
-	noCache bool
+	initEnv bool
 )
 
 func init() {
-	rootCmd.AddCommand(cmdInit)
-	cmdInit.Flags().BoolVar(&noCache, "no-cache", false, "passes --no-cache to docker build")
+	cmdInit.Flags().BoolVarP(&initEnv, "env", "e", false, "if provided, also runs the equivalent of \"lafuzz env init\"")
 }
 
 func runInit(cmd *cobra.Command, args []string) error {
@@ -54,22 +54,21 @@ func runInit(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if err := viper.ReadInConfig(); err != nil {
-		fmt.Println(err)
-	}
 	// NB: repo root is expected to be the parent of outputRoot.
 	viper.Set(config.RepoRoot, filepath.Dir(outputRoot))
 	if err := viper.SafeWriteConfig(); err != nil {
 		return err
 	}
 
-	contextDir := filepath.Join(outputRoot, "docker")
-	dockerfile := filepath.Join(contextDir, "go-fuzz.dockerfile")
-	var dockerArgs []string
-	if noCache {
-		dockerArgs = append(dockerArgs, "--no-cache")
+	fmt.Println("Repo initialized for use with lafuzz.")
+	if initEnv {
+		if err := env.CmdInit.RunE(cmd, nil); err != nil {
+			return err
+		}
+	} else {
+		fmt.Println("Next run `lafuzz env init`!")
 	}
-	return buildDocker(contextDir, dockerfile, dockerArgs...)
+	return nil
 }
 
 func makeAllWorkdirsDir(outputRoot string) error {
@@ -85,14 +84,4 @@ func makeAllWorkdirsDir(outputRoot string) error {
 		return err
 	}
 	return nil
-}
-
-// TODO: doesn't detect fs changes
-func buildDocker(contextDir, dockerfile string, additionalArgs ...string) error {
-	argsStr := fmt.Sprintf("build -t go-fuzz -f %s %s", dockerfile, contextDir)
-	args := append(strings.Split(argsStr, " "), additionalArgs...)
-	cmd := exec.Command("docker", args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
 }
