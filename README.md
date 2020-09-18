@@ -11,14 +11,14 @@ GO111MODULE=off go get -u github.com/leastauthority/lafuzz/cmd/lafuzz
 # Navigate to the root of the repo you'll be fuzzing:
 cd ./path/to/repo/root
 
-# Init lafuzz files in repo (see `lafuzz -h` for help):
+# Init lafuzz files in repo:
 lafuzz init
 
 # Init local fuzzing environment
 lafuzz env init
 
-OR do both at the same time
-lafuzz init --env
+# OR do both at the same time
+# lafuzz init --env
 ```
 ```
 A tool to manage fuzzing environment
