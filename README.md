@@ -43,7 +43,7 @@ Use "lafuzz [command] --help" for more information about a command.
 #### Fuzzing
 Now fuzz functions need to be defined.
 The current convention is that they should be in or around the same package as the code they exercise.
-Conventionally the `gofuzz` build tag is used to exclude this code from normal builds and tests.
+The `gofuzz` build tag is used to exclude this code from normal builds and tests.
 
 Fuzz functions follow the `go-fuzz` signature:
 ```golang
@@ -64,7 +64,8 @@ lafuzz fuzz ./path/to/mypkg FuzzMyFunc [--procs <n>]
 #### Triaging
 Once you've discovered some crashing inputs you can look through their stack traces to debug them.
 It's possible that over the course of fuzzing you may discover many thousands of crashing inputs.
-The convention here is to tackle these one at a time.
+We're going to tackle these one at a time.
+It's possible that multiple inputs have a common bug.
 
 To debug, add a "triage test" which will run the crashing inputs back through the fuzz function that produced them to see if they're still crashing.
 This also has the benefit of acting as a regression test when combined with a with a simple assertion at all inputs are no longer crashing, and retaining the crashers in version control.
