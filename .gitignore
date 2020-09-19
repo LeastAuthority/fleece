@@ -1,2 +1,5 @@
+# IDE files
+.idea/
+
 # go-fuzz binaries
 *-fuzz.zip
