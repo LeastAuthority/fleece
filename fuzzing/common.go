@@ -124,12 +124,16 @@ func (iter CrasherIterator) TestFailingLimit(t *testing.T, limit int) (_ *Crashe
 	crasherIterator, err := NewCrasherItertor(iter.fuzzFunc)
 	require.NoError(t, err)
 
+	//var i int
 	// TODO: parallelize
 	var done, didPanic bool
 	var firstCrasher, crasher *Crasher
 	for !done && panics < limit {
 		crasher, done, err = crasherIterator.Next()
 		require.NoError(t, err)
+
+		//t.Logf("i: %d; crasher: %s", i, crasher.Name)
+		//i++
 
 		didPanic = false
 		crasher.Test(func(panicMsg string) {
