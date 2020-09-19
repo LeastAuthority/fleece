@@ -21,8 +21,8 @@ const (
 var (
 	cmdInit = &cobra.Command{
 		Use:   "init [output-dir]",
-		Short: "initialize lafuzz into repo",
-		Long:  "Copies supporting files into output-dir (default: $(pwd)/lafuzz); add config file (default: .lafuzz.yaml); build go-fuzz docker image",
+		Short: "initialize lafuzz into a repo",
+		Long:  "copies supporting files into output-dir (default: $(pwd)/lafuzz) and adds config file (default: .lafuzz.yaml)",
 		Args:  cobra.MaximumNArgs(1),
 		RunE:  runInit,
 	}

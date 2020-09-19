@@ -17,7 +17,7 @@ import (
 var (
 	cmdFuzz = &cobra.Command{
 		Use:   "fuzz <pkg> <fuzz function>",
-		Short: "start a fuzzing container for the specified fuzz function (blocking)",
+		Short: "run go-fuzz against a fuzz function",
 		Args:  cobra.ExactArgs(2),
 		RunE:  runFuzz,
 	}

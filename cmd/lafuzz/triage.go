@@ -12,7 +12,7 @@ import (
 var (
 	cmdTriage = &cobra.Command{
 		Use:   "triage <pkg> <fuzz function>",
-		Short: "tests known crashing inputs and prints a summary.",
+		Short: "test crashers and summarize",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := runTriage(cmd, args); err != nil {

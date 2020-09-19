@@ -14,7 +14,7 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "lafuzz",
-	Short: "A tool to manage fuzzing environment",
+	Short: "Fuzz -> Triage -> Debug -> Repeat",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
