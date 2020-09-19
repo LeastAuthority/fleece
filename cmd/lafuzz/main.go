@@ -8,6 +8,7 @@ import (
 func init() {
   cmds := []*cobra.Command{
     cmdInit,
+    cmdUpdate,
     cmdFuzz,
     cmdTriage,
     env.CmdEnv,
