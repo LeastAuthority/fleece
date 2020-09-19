@@ -47,17 +47,21 @@ Use the `gofuzz` build tag to exclude this code from normal builds and tests.
 
 Fuzz functions follow the `go-fuzz` signature:
 ```golang
-# /path/to/mypkg/my_fuzz.go
+# see ./example/example_fuzz.go
 
 //+build gofuzz
 
-func FuzzMyFunc(data []byte) int
+package example
+
+func FuzzBuggyFunc(data []byte) int {
+    // ...
+}
 ```
 _(see: [go-fuzz readme](https://github.com/dvyukov/go-fuzz/blob/master/README.md) for more details)_
 
 To run your fuzz functions:
 ```bash
-lafuzz fuzz ./path/to/mypkg FuzzMyFunc [--procs <n>]
+lafuzz fuzz ./exaample FuzzBuggyFunc --procs 1
 # see lafuzz fuzz --help
 ```
 
@@ -73,14 +77,18 @@ Again, it's probably best to se the `gofuzz` build tag to exclude this code from
 
 Here's the triage test corresponding with our example above:
 ```golang
-# /path/to/mypkg/my_fuzz_test.go
+# see ./example/example_fuzz_test.go
 
 //+build gofuzz
 
-func TestFuzzMyFunc(t *testing.T) {
-	_, panics, _ := lafuzz.
-		MustNewCrasherIterator(FuzzMyFunc).
-		TestFailingLimit(t, 1000)
+package example
+
+// ...
+
+func TestFuzzBuggyFunc(t *testing.T) {
+	_, panics, _ := fuzzing.
+		MustNewCrasherIterator(FuzzBuggyFunc).
+		TestFailingLimit(t, crashLimit)
 
 	require.Zero(t, panics)
 }
@@ -89,7 +97,7 @@ func TestFuzzMyFunc(t *testing.T) {
 Use the `triage` command to look at the next crashing input and its stack trace, as well as to get a summary of where you are in the overall triage process.
 With this information you should be able to debug the issue and re-run the triage test to see if that input is still crashing.
 ```bash
-lafuzz triage ./path/to/mypkg FuzzMyFunc
+lafuzz triage ./example FuzzBuggyFunc
 # see lafuzz triage --help
 ```
 
