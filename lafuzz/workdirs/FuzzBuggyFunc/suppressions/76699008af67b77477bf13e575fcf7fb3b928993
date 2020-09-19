@@ -1,0 +1,4 @@
+panic: input and result aren't equal!
+github.com/leastauthority/lafuzz/example.FuzzBuggyFunc
+go-fuzz-dep.Main
+main.main

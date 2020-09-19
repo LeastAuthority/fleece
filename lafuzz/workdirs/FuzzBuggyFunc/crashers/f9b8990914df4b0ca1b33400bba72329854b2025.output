@@ -1,0 +1,10 @@
+panic: input and result aren't equal!
+
+goroutine 1 [running]:
+github.com/leastauthority/lafuzz/example.FuzzBuggyFunc(0x7f90fd0d3000, 0x6, 0x6, 0x3)
+	/tmp/fuzzing/example/exampe_fuzz.go:18 +0x191
+go-fuzz-dep.Main(0xc0001a9f70, 0x1, 0x1)
+	go-fuzz-dep/main.go:36 +0x1ad
+main.main()
+	github.com/leastauthority/lafuzz/example/go.fuzz.main/main.go:15 +0x52
+exit status 2
