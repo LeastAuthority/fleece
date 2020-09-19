@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/leastauthority/lafuzz/cmd/config"
@@ -27,8 +28,8 @@ var (
 )
 
 func init() {
-	cmdFuzz.Flags().BoolVar(&buildCorpus, "build-corpus", false, "if true, builds corpus before running (default: false)")
-	cmdFuzz.Flags().IntVar(&procs, "procs", 1, "number of processors to use (passed to go-fuzz's -procs flag)")
+	cmdFuzz.Flags().BoolVarP(&buildCorpus, "build-corpus", "b", false, "if true, builds corpus before running (default: false)")
+	cmdFuzz.Flags().IntVarP(&procs, "procs", "p", 1, "number of processors to use (passed to go-fuzz's -procs flag)")
 }
 
 // TODO: stop container on exit!
@@ -43,13 +44,18 @@ func runFuzz(cmd *cobra.Command, args []string) error {
 
 	// TODO: factor out
 	name := containerName(pkgPath, fuzzFuncName)
+	// TODO: factor out
+	// NB: guest workdir path.
+	workdir := filepath.Join(".", "lafuzz", "workdirs", fuzzFuncName)
 	runArgs := []string{
 		"--rm", "-d",
 		"--name", name,
 		"--entrypoint", "/go-fuzz.sh",
 		"-v", fmt.Sprintf("%s:/tmp/fuzzing", repoRoot),
-		"go-fuzz", pkgPath, fuzzFuncName, build, "--", "-procs", fmt.Sprint(procs),
+		"go-fuzz", pkgPath, fuzzFuncName, build,
+		"--", "-procs", fmt.Sprint(procs), "-workdir", workdir,
 	}
+	fmt.Printf("runArgs: %s\n", strings.Join(runArgs, " "))
 
 	if err := runContainer(repoRoot, runArgs); err != nil {
 		return err

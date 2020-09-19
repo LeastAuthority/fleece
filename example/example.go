@@ -7,7 +7,7 @@ import (
 
 func PanickyFunc(input []byte) ([]byte, error) {
 	v := new(struct {
-		field1 int
+		field1 int `json:"field1"`
 	})
 	if err := json.Unmarshal(input, v); err != nil {
 		return nil, err

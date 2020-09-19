@@ -157,7 +157,7 @@ func (iter CrasherIterator) TestFailingLimit(t *testing.T, limit int) (_ *Crashe
 }
 
 func GetWorkdir(name string) string {
-	pkgPath := reflect.TypeOf(FuzzNormal).PkgPath()
+	pkgPath := reflect.TypeOf(Crasher{}).PkgPath()
 	modPath, err := internal.GetModPath(pkgPath)
 	if err != nil {
 		// NB: I'm pretty sure this shouldn't be possible
