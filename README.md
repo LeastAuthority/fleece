@@ -31,7 +31,7 @@ Available Commands:
   fuzz        run go-fuzz against a fuzz function
   help        Help about any command
   init        initialize lafuzz into a repo
-  triage      test crashers and summarize.
+  triage      test crashers and summarize
 
 Flags:
       --config string   config file (default is $(pwd)/.lafuzz.yaml)
@@ -43,7 +43,7 @@ Use "lafuzz [command] --help" for more information about a command.
 #### Fuzzing
 Now fuzz functions need to be defined.
 The current convention is that they should be in or around the same package as the code they exercise.
-The `gofuzz` build tag is used to exclude this code from normal builds and tests.
+Use the `gofuzz` build tag to exclude this code from normal builds and tests.
 
 Fuzz functions follow the `go-fuzz` signature:
 ```golang
