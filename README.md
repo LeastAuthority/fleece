@@ -69,6 +69,7 @@ It's possible that multiple inputs have a common bug.
 
 To debug, add a "triage test" which will run the crashing inputs back through the fuzz function that produced them to see if they're still crashing.
 This also has the benefit of acting as a regression test when combined with a with a simple assertion at all inputs are no longer crashing, and retaining the crashers in version control.
+Again, it's probably best to se the `gofuzz` build tag to exclude this code from normal builds and tests.
 
 Here's the triage test corresponding with our example above:
 ```golang
@@ -103,3 +104,16 @@ GO111MODULE=off go get github.com/go-bindata/go-bindata/...
 # In lafuzz repo root
 go-bindata -pkg fuzzing -ignore docker\\.go -o docker/docker.go ./docker/...
 ```
+
+
+#### Feature Wishlist
+- Internals
+  + [ ] Parallelize triaging!
+  + [ ] Switch to docker engine api
+- Generators
+  + [ ] fuzz functions
+  + [ ] triage tests
+- Reporting
+  + [ ] Summary (per fuzz function)
+  + [ ] Unique crashing outputs (per fuzz function)
+  + [ ] Issue tracking integration
