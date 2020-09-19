@@ -21,17 +21,17 @@ lafuzz env init
 # lafuzz init --env
 ```
 ```
-A tool to manage fuzzing environment
+Fuzz -> Triage -> Debug -> Repeat
 
 Usage:
   lafuzz [command]
 
 Available Commands:
   env         manage local fuzzing environment
-  fuzz        start a fuzzing container for the specified fuzz function (blocking)
+  fuzz        run go-fuzz against a fuzz function
   help        Help about any command
-  init        initialize lafuzz into repo
-  triage      tests known crashing inputs and prints a summary.
+  init        initialize lafuzz into a repo
+  triage      test crashers and summarize.
 
 Flags:
       --config string   config file (default is $(pwd)/.lafuzz.yaml)
