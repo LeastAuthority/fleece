@@ -15,14 +15,23 @@ pkg=$1
 shift
 name=$1
 shift
+# TODO: undo this hack.
 workdir=./fleece/workdirs/${name}
 bin=${pkg:2}-fuzz.zip
+bin_path=${workdir}/${bin}
+
+has_built=false
+build() {
+  go-fuzz-build ${pkg}
+  mv ${pkg}-fuzz.zip ${bin_path}
+}
 
 while [[ $# -gt 0 ]]; do
   case $1 in
   -b | --build)
-    go-fuzz-build ${pkg}
-    mv ${pkg}-fuzz.zip ${workdir}/${bin}
+    echo "Building fuzz binary..."
+    build
+    has_built=true
     shift
     ;;
   --)
@@ -36,6 +45,11 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+if [[ $has_built == "false" && ! -e $bin_path ]]; then
+  echo "Fuzz binary not found; building..."
+  build
+fi
+
 rest_args=$@
 
-go-fuzz -bin=${workdir}/${bin} -func=${name} -workdir=${workdir} $rest_args
+go-fuzz -bin=${bin_path} -func=${name} -workdir=${workdir} $rest_args

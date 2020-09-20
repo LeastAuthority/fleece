@@ -27,7 +27,7 @@ var (
 )
 
 func init() {
-	cmdFuzz.Flags().BoolVarP(&buildBin, "build", "b", true, "if true, rebuilds test binary before running (default: true)")
+	cmdFuzz.Flags().BoolVarP(&buildBin, "build", "b", false, "if true, rebuilds test binary before running (default: false)")
 	cmdFuzz.Flags().IntVarP(&procs, "procs", "p", 1, "number of processors to use (passed to go-fuzz's -procs flag)")
 }
 
