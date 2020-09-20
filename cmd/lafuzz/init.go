@@ -39,11 +39,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 	if len(args) > 0 {
 		outputRoot = args[0]
 	} else {
-		pwd, err := os.Getwd()
-		if err != nil {
-			return err
-		}
-		outputRoot = filepath.Join(pwd, defaultRoot)
+		outputRoot = filepath.Join(".", defaultRoot)
 	}
 
 	if err := makeAllWorkdirsDir(outputRoot); err != nil {

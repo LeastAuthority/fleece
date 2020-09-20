@@ -9,5 +9,6 @@ WORKDIR /tmp/fuzzing
 
 # NB: for use with docker-compose
 COPY ./go-fuzz.sh /go-fuzz.sh
+RUN chmod 755 /go-fuzz.sh
 
 CMD bash

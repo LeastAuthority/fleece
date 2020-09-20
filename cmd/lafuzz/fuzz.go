@@ -9,7 +9,6 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/leastauthority/lafuzz/cmd/config"
@@ -23,22 +22,28 @@ var (
 		RunE:  runFuzz,
 	}
 
-	buildCorpus bool
-	procs       int
+	buildBin bool
+	procs    int
 )
 
 func init() {
-	cmdFuzz.Flags().BoolVarP(&buildCorpus, "build-corpus", "b", false, "if true, builds corpus before running (default: false)")
+	cmdFuzz.Flags().BoolVarP(&buildBin, "build", "b", true, "if true, rebuilds test binary before running (default: true)")
 	cmdFuzz.Flags().IntVarP(&procs, "procs", "p", 1, "number of processors to use (passed to go-fuzz's -procs flag)")
 }
 
-// TODO: stop container on exit!
+func absRepoRoot() string {
+	absoluteOutputRoot, err := filepath.Abs(viper.GetString(config.RepoRoot))
+	if err != nil {
+		panic(err)
+	}
+	return absoluteOutputRoot
+}
 func runFuzz(cmd *cobra.Command, args []string) error {
 	pkgPath := args[0]
 	fuzzFuncName := args[1]
-	repoRoot := viper.GetString(config.RepoRoot)
+	repoRoot := absRepoRoot() //viper.GetString(config.RepoRoot)
 	var build string
-	if buildCorpus {
+	if buildBin {
 		build = "-b"
 	}
 
@@ -55,7 +60,7 @@ func runFuzz(cmd *cobra.Command, args []string) error {
 		"go-fuzz", pkgPath, fuzzFuncName, build,
 		"--", "-procs", fmt.Sprint(procs), "-workdir", workdir,
 	}
-	fmt.Printf("runArgs: %s\n", strings.Join(runArgs, " "))
+	//fmt.Printf("runArgs: %s\n", strings.Join(runArgs, " "))
 
 	if err := runContainer(repoRoot, runArgs); err != nil {
 		return err

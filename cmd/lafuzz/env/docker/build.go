@@ -37,7 +37,6 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	return buildDocker(getDockerDir(), getDockerfilePath(), dockerArgs...)
 }
 
-// TODO: doesn't detect fs changes
 func buildDocker(contextDir, dockerfile string, additionalArgs ...string) error {
 	argsStr := fmt.Sprintf("build -t go-fuzz -f %s %s", dockerfile, contextDir)
 	args := append(strings.Split(argsStr, " "), additionalArgs...)

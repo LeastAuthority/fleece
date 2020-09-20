@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"fmt"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
@@ -22,7 +23,12 @@ func init() {
 }
 
 func getDockerDir() string {
-	return filepath.Join(viper.GetString(config.OutputRoot), dockerDirName)
+	absoluteOutputRoot, err := filepath.Abs(viper.GetString(config.RepoRoot))
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("abs: %s\n", absoluteOutputRoot)
+	return filepath.Join(absoluteOutputRoot, dockerDirName)
 }
 
 func getDockerfilePath() string {
