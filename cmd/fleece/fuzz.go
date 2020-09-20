@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/leastauthority/lafuzz/cmd/config"
+	"github.com/leastauthority/fleece/cmd/config"
 )
 
 var (

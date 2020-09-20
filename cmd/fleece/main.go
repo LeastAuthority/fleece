@@ -1,7 +1,7 @@
 package main
 
 import (
-  "github.com/leastauthority/lafuzz/cmd/fleece/env"
+  "github.com/leastauthority/fleece/cmd/fleece/env"
   "github.com/spf13/cobra"
 )
 

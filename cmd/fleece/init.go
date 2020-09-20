@@ -9,9 +9,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/leastauthority/lafuzz/cmd/config"
-	"github.com/leastauthority/lafuzz/cmd/fleece/env"
-	"github.com/leastauthority/lafuzz/docker"
+	"github.com/leastauthority/fleece/cmd/config"
+	"github.com/leastauthority/fleece/cmd/fleece/env"
+	"github.com/leastauthority/fleece/docker"
 )
 
 const (

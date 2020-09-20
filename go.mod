@@ -1,4 +1,4 @@
-module github.com/leastauthority/lafuzz
+module github.com/leastauthority/fleece
 
 go 1.15
 

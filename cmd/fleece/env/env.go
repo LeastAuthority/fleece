@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 
-	"github.com/leastauthority/lafuzz/cmd/fleece/env/docker"
+	"github.com/leastauthority/fleece/cmd/fleece/env/docker"
 )
 
 var (

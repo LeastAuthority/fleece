@@ -1,4 +1,4 @@
-# fleece
+# Fleece
 ## Value proposition
 Simple to use and extensible tool that facilitates a fuzz -> triage -> debug workflow with mininal impact on the target repo.
 

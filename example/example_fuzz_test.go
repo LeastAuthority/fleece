@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/leastauthority/lafuzz/fuzzing"
+	"github.com/leastauthority/fleece/fuzzing"
 )
 
 var crashLimit int

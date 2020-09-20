@@ -5,7 +5,7 @@ package example
 import (
 	"bytes"
 
-	"github.com/leastauthority/lafuzz/fuzzing"
+	"github.com/leastauthority/fleece/fuzzing"
 )
 
 func FuzzBuggyFunc(data []byte) int {

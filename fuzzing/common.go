@@ -10,7 +10,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/leastauthority/lafuzz/internal"
+	"github.com/leastauthority/fleece/internal"
 )
 
 // Fuzz constants for go-fuzz to use when returning from the Fuzz func
