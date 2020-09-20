@@ -32,6 +32,7 @@ Available Commands:
   help        Help about any command
   init        initialize lafuzz into a repo
   triage      test crashers and summarize
+  update      update lafuzz CLI binary using "go get -u"
 
 Flags:
       --config string   config file (default is $(pwd)/.lafuzz.yaml)
