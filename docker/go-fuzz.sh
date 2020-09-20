@@ -38,4 +38,4 @@ done
 
 rest_args=$@
 
-go-fuzz -bin=${workdir}/${bin}-fuzz.zip -func=${name} -workdir=${workdir} $rest_args
+go-fuzz -bin=${workdir}/${bin} -func=${name} -workdir=${workdir} $rest_args
