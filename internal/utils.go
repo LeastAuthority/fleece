@@ -48,7 +48,6 @@ func GetModPath(importPath string) (string, error) {
 
 func GetFuncName(f interface{}) string {
 	val := reflect.ValueOf(f)
-	fmt.Printf("val.Type().Name(): %s", val.Type().Name())
 	addr := val.Pointer()
 	return filepath.Ext(runtime.FuncForPC(addr).Name())[1:]
 }

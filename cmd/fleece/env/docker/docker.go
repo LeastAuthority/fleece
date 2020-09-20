@@ -1,7 +1,6 @@
 package docker
 
 import (
-	"fmt"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
@@ -27,7 +26,7 @@ func getDockerDir() string {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("abs: %s\n", absoluteOutputRoot)
+	//fmt.Printf("abs: %s\n", absoluteOutputRoot)
 	return filepath.Join(absoluteOutputRoot, dockerDirName)
 }
 

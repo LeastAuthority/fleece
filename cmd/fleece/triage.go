@@ -16,7 +16,6 @@ var (
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := runTriage(cmd, args); err != nil {
-				fmt.Printf("%+v\n", err)
 				return err
 			}
 			return nil
