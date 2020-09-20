@@ -15,7 +15,7 @@ pkg=$1
 shift
 name=$1
 shift
-workdir=./lafuzz/workdirs/${name}
+workdir=./fleece/workdirs/${name}
 bin=${pkg:2}-fuzz.zip
 
 while [[ $# -gt 0 ]]; do

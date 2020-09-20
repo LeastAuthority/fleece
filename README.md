@@ -1,44 +1,44 @@
-# lafuzz
+# fleece
 ## Value proposition
 Simple to use and extensible tool that facilitates a fuzz -> triage -> debug workflow with mininal impact on the target repo.
 
 ## How to use
 #### Setup and help
 ```bash
-# Install lafuzz CLI binary:
-GO111MODULE=off go get -u github.com/leastauthority/lafuzz/cmd/lafuzz
+# Install fleece CLI binary:
+GO111MODULE=off go get -u github.com/leastauthority/fleece/cmd/fleece
 
 # Navigate to the root of the repo you'll be fuzzing:
 cd ./path/to/repo/root
 
-# Init lafuzz files in repo:
-lafuzz init
+# Init fleece files in repo:
+fleece init
 
 # Init local fuzzing environment
-lafuzz env init
+fleece env init
 
 # OR do both at the same time
-# lafuzz init --env
+# fleece init --env
 ```
 ```
 Fuzz -> Triage -> Debug -> Repeat
 
 Usage:
-  lafuzz [command]
+  fleece [command]
 
 Available Commands:
   env         manage local fuzzing environment
   fuzz        run go-fuzz against a fuzz function
   help        Help about any command
-  init        initialize lafuzz into a repo
+  init        initialize fleece into a repo
   triage      test crashers and summarize
-  update      update lafuzz CLI binary using "go get -u"
+  update      update fleece CLI binary using "go get -u"
 
 Flags:
-      --config string   config file (default is $(pwd)/.lafuzz.yaml)
-  -h, --help            help for lafuzz
+      --config string   config file (default is $(pwd)/.fleece.yaml)
+  -h, --help            help for fleece
 
-Use "lafuzz [command] --help" for more information about a command.
+Use "fleece [command] --help" for more information about a command.
 ```
 
 #### Fuzzing
@@ -62,8 +62,8 @@ _(see: [go-fuzz readme](https://github.com/dvyukov/go-fuzz/blob/master/README.md
 
 To run your fuzz functions:
 ```bash
-lafuzz fuzz ./exaample FuzzBuggyFunc --procs 1
-# see lafuzz fuzz --help
+fleece fuzz ./exaample FuzzBuggyFunc --procs 1
+# see fleece fuzz --help
 ```
 
 #### Triaging
@@ -98,8 +98,8 @@ func TestFuzzBuggyFunc(t *testing.T) {
 Use the `triage` command to look at the next crashing input and its stack trace, as well as to get a summary of where you are in the overall triage process.
 With this information you should be able to debug the issue and re-run the triage test to see if that input is still crashing.
 ```bash
-lafuzz triage ./example FuzzBuggyFunc
-# see lafuzz triage --help
+fleece triage ./example FuzzBuggyFunc
+# see fleece triage --help
 ```
 
 ## Contributing
@@ -110,7 +110,7 @@ _(see: https://github.com/go-bindata/go-bindata)_
 # Install gobindata
 GO111MODULE=off go get github.com/go-bindata/go-bindata/...
 
-# In lafuzz repo root
+# In fleece repo root
 go-bindata -pkg fuzzing -ignore docker\\.go -o docker/docker.go ./docker/...
 ```
 

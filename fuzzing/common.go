@@ -168,7 +168,7 @@ func GetWorkdir(name string) string {
 		panic(err)
 	}
 
-	return filepath.Join(modPath, "lafuzz", "workdirs", name)
+	return filepath.Join(modPath, "fleece", "workdirs", name)
 }
 
 func GetCrashersDir(name string) string {
