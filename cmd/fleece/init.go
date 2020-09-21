@@ -20,7 +20,9 @@ const (
 
 var (
 	cmdInit = &cobra.Command{
-		Use:   "init [output-dir]",
+		// NB: disabled until hacks that break support are removed.
+		//Use:   "init [output-dir]",
+		Use:   "init",
 		Short: "Initialize fleece into a repo",
 		Long:  "Copies supporting files into output-dir (default: $(pwd)/fleece) and adds config file (default: .fleece.yaml)",
 		Args:  cobra.MaximumNArgs(1),

@@ -14,8 +14,11 @@ import (
 
 var crashLimit int
 
-func TestMain(m *testing.M) {
+func init() {
 	flag.IntVar(&crashLimit, "crash-limit", 1000, "number of crashing inputs to test before stopping")
+}
+
+func TestMain(m *testing.M) {
 	flag.Parse()
 	os.Exit(m.Run())
 }
