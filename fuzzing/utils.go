@@ -1,4 +1,6 @@
-package internal
+//+build gofuzz
+
+package fuzzing
 
 import (
 	"errors"

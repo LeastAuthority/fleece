@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/leastauthority/fleece/bindata"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -11,7 +12,6 @@ import (
 
 	"github.com/leastauthority/fleece/cmd/config"
 	"github.com/leastauthority/fleece/cmd/fleece/env"
-	"github.com/leastauthority/fleece/docker"
 )
 
 const (
@@ -48,7 +48,10 @@ func runInit(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if err := docker.RestoreAssets(outputRoot, "docker"); err != nil {
+	if err := bindata.RestoreAssets(outputRoot, "docker"); err != nil {
+		return err
+	}
+	if err := bindata.RestoreAssets(outputRoot, "fuzzing"); err != nil {
 		return err
 	}
 

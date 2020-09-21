@@ -1,3 +1,5 @@
+//+build gofuzz
+
 package fuzzing
 
 import (
@@ -9,8 +11,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-
-	"github.com/leastauthority/fleece/internal"
 )
 
 // Fuzz constants for go-fuzz to use when returning from the Fuzz func
@@ -42,11 +42,11 @@ type FuzzFunc func([]byte) int
 type RecoverCallback func(panicMsg string)
 
 // NewCrasherIteratorFor returns an iterator for crashers that lazily loads	their inputs and outputs.
-func NewCrasherItertor(fuzzFunc FuzzFunc) (*CrasherIterator, error) {
-	name := internal.GetFuncName(fuzzFunc)
+func NewCrasherIterator(fuzzFunc FuzzFunc) (*CrasherIterator, error) {
+	name := GetFuncName(fuzzFunc)
 	workdir := GetWorkdir(name)
-	crashersDir := filepath.Join(workdir, "crashers")
-	crasherInfos, err := ioutil.ReadDir(crashersDir)
+	crasherDir := GetCrasherDir(name)
+	crasherInfos, err := ioutil.ReadDir(crasherDir)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func NewCrasherItertor(fuzzFunc FuzzFunc) (*CrasherIterator, error) {
 
 // MustNewCrasherIterator returns an iterator for crashers but panics if an error occurs.
 func MustNewCrasherIterator(fuzzFunc FuzzFunc) *CrasherIterator {
-	iter, err := NewCrasherItertor(fuzzFunc)
+	iter, err := NewCrasherIterator(fuzzFunc)
 	if err != nil {
 		panic(err)
 	}
@@ -121,19 +121,15 @@ func (iter *CrasherIterator) Next() (next *Crasher, done bool, err error) {
 // TestFailingLimit tests each crasher's input against its respective fuzz
 //	function until it sees `limit` failing inputs
 func (iter CrasherIterator) TestFailingLimit(t *testing.T, limit int) (_ *Crasher, panics int, total int) {
-	crasherIterator, err := NewCrasherItertor(iter.fuzzFunc)
+	crasherIterator, err := NewCrasherIterator(iter.fuzzFunc)
 	require.NoError(t, err)
 
-	//var i int
 	// TODO: parallelize
 	var done, didPanic bool
 	var firstCrasher, crasher *Crasher
 	for !done && panics < limit {
 		crasher, done, err = crasherIterator.Next()
 		require.NoError(t, err)
-
-		//t.Logf("i: %d; crasher: %s", i, crasher.Name)
-		//i++
 
 		didPanic = false
 		crasher.Test(func(panicMsg string) {
@@ -162,7 +158,7 @@ func (iter CrasherIterator) TestFailingLimit(t *testing.T, limit int) (_ *Crashe
 
 func GetWorkdir(name string) string {
 	pkgPath := reflect.TypeOf(Crasher{}).PkgPath()
-	modPath, err := internal.GetModPath(pkgPath)
+	modPath, err := GetModPath(pkgPath)
 	if err != nil {
 		// NB: I'm pretty sure this shouldn't be possible
 		panic(err)
@@ -171,7 +167,6 @@ func GetWorkdir(name string) string {
 	return filepath.Join(modPath, "fleece", "workdirs", name)
 }
 
-func GetCrashersDir(name string) string {
+func GetCrasherDir(name string) string {
 	return filepath.Join(GetWorkdir(name), "crashers")
 }
-

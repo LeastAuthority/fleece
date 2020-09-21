@@ -103,7 +103,7 @@ fleece triage ./example FuzzBuggyFunc
 ```
 
 ## Contributing
-#### Updating docker files (and/or other assets)
+#### Updating bindata files
 
 _(see: https://github.com/go-bindata/go-bindata)_
 ```bash
@@ -111,7 +111,7 @@ _(see: https://github.com/go-bindata/go-bindata)_
 GO111MODULE=off go get github.com/go-bindata/go-bindata/...
 
 # In fleece repo root
-go-bindata -pkg docker -ignore docker\\.go -o docker/docker.go ./docker/...
+go-bindata -pkg bindata -o bindata/bindata.go ./docker/... ./fuzzing/...
 ```
 
 
