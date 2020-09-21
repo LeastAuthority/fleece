@@ -22,8 +22,8 @@ bin_path=${workdir}/${bin}
 
 has_built=false
 build() {
-  go-fuzz-build ${pkg}
-  mv ${pkg}-fuzz.zip ${bin_path}
+  mkdir -p ${workdir}
+  go-fuzz-build -o ${bin_path} ${pkg}
 }
 
 while [[ $# -gt 0 ]]; do
