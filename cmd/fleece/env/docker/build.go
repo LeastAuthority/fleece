@@ -38,8 +38,9 @@ func runBuild(cmd *cobra.Command, args []string) error {
 }
 
 func buildDocker(contextDir, dockerfile string, additionalArgs ...string) error {
-	argsStr := fmt.Sprintf("build -t go-fuzz -f %s %s", dockerfile, contextDir)
-	args := append(strings.Split(argsStr, " "), additionalArgs...)
+	argsStr := fmt.Sprintf("build -t go-fuzz -f")
+	args := append(strings.Split(argsStr, " "), dockerfile, contextDir)
+	args = append(args, additionalArgs...)
 	cmd := exec.Command("docker", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
