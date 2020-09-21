@@ -22,12 +22,12 @@ func init() {
 }
 
 func getDockerDir() string {
-	absoluteOutputRoot, err := filepath.Abs(viper.GetString(config.RepoRoot))
+	absoluteRepoRoot, err := filepath.Abs(viper.GetString(config.RepoRoot))
 	if err != nil {
 		panic(err)
 	}
-	//fmt.Printf("abs: %s\n", absoluteOutputRoot)
-	return filepath.Join(absoluteOutputRoot, dockerDirName)
+	//fmt.Printf("abs: %s\n", absoluteRepoRoot)
+	return filepath.Join(absoluteRepoRoot, "fleece", dockerDirName)
 }
 
 func getDockerfilePath() string {

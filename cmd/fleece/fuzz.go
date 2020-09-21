@@ -32,11 +32,11 @@ func init() {
 }
 
 func absRepoRoot() string {
-	absoluteOutputRoot, err := filepath.Abs(viper.GetString(config.RepoRoot))
+	absoluteRepoRoot, err := filepath.Abs(viper.GetString(config.RepoRoot))
 	if err != nil {
 		panic(err)
 	}
-	return absoluteOutputRoot
+	return absoluteRepoRoot
 }
 func runFuzz(cmd *cobra.Command, args []string) error {
 	pkgPath := args[0]
