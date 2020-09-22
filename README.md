@@ -62,7 +62,7 @@ _(see: [go-fuzz readme](https://github.com/dvyukov/go-fuzz/blob/master/README.md
 
 To run your fuzz functions:
 ```bash
-fleece fuzz ./exaample FuzzBuggyFunc --procs 1
+fleece fuzz ./example FuzzBuggyFunc --procs 1
 # see fleece fuzz --help
 ```
 
