@@ -77,6 +77,7 @@ This also has the benefit of acting as a regression test when combined with a wi
 Again, it's probably best to se the `gofuzz` build tag to exclude this code from normal builds and tests.
 
 Here's the triage test corresponding with our example above:
+_(NOTE: currently fleece expects the `crash-limit` flag to be defined on triage tests!)_
 ```golang
 # see ./example/example_fuzz_test.go
 
@@ -84,7 +85,16 @@ Here's the triage test corresponding with our example above:
 
 package example
 
-// ...
+var crashLimit int
+
+func init() {
+	flag.IntVar(&crashLimit, "crash-limit", 1000, "number of crashing inputs to test before stopping")
+}
+
+func TestMain(m *testing.M) {
+	flag.Parse()
+	os.Exit(m.Run())
+}
 
 func TestFuzzBuggyFunc(t *testing.T) {
 	_, panics, _ := fuzzing.

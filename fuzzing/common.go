@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime/debug"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -70,7 +71,7 @@ func MustNewCrasherIterator(fuzzFunc FuzzFunc) *CrasherIterator {
 //	string representation of the recovered value in the event of a panic.
 func (crasher *Crasher) Recover(recoverCb RecoverCallback) {
 	if r := recover(); r != nil {
-		recoverCb(fmt.Sprint(r))
+		recoverCb(fmt.Sprintf("%s\n%s", r, string(debug.Stack())))
 	}
 }
 
@@ -90,7 +91,7 @@ func (iter *CrasherIterator) Next() (next *Crasher, done bool, err error) {
 		name := info.Name()
 		if info.IsDir() || filepath.Ext(name) != "" {
 			iter.i++
-			done = iter.i == len(iter.infos)-2
+			done = iter.i == len(iter.infos)-1
 			continue
 		}
 
@@ -112,7 +113,7 @@ func (iter *CrasherIterator) Next() (next *Crasher, done bool, err error) {
 		}
 
 		iter.i++
-		done = iter.i == len(iter.infos)-2
+		done = iter.i == len(iter.infos)-1
 		break
 	}
 	return next, done, nil
@@ -127,14 +128,19 @@ func (iter CrasherIterator) TestFailingLimit(t *testing.T, limit int) (_ *Crashe
 	// TODO: parallelize
 	var done, didPanic bool
 	var firstCrasher, crasher *Crasher
-	for !done && panics < limit {
+	var firstPanicMsg string
+	for panics < limit {
 		crasher, done, err = crasherIterator.Next()
 		require.NoError(t, err)
+		if done {
+			break
+		}
 
 		didPanic = false
 		crasher.Test(func(panicMsg string) {
 			didPanic = true
-			if firstCrasher == nil && crasher != nil {
+			if firstCrasher == nil {
+				firstPanicMsg = panicMsg
 				firstCrasher = crasher
 			}
 		})
@@ -157,7 +163,7 @@ func (iter CrasherIterator) TestFailingLimit(t *testing.T, limit int) (_ *Crashe
 }
 
 func GetWorkdir(name string) string {
-	pkgPath := reflect.TypeOf(Crasher{}).PkgPath()
+	pkgPath := reflect.TypeOf(_anchor{}).PkgPath()
 	modPath, err := GetModPath(pkgPath)
 	if err != nil {
 		// NB: I'm pretty sure this shouldn't be possible

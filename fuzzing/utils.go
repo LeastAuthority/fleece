@@ -12,7 +12,8 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-type fuzzFunc func([]byte) int
+// _anchor is a type that we can use to resolve paths using go packages.
+type _anchor struct{}
 
 func GetModPath(importPath string) (string, error) {
 	mode := packages.NeedName | packages.NeedModule
@@ -49,7 +50,7 @@ func GetModPath(importPath string) (string, error) {
 	return mod.Dir, nil
 }
 
-func GetFuncName(f interface{}) string {
+func GetFuncName(f FuzzFunc) string {
 	val := reflect.ValueOf(f)
 	addr := val.Pointer()
 	return filepath.Ext(runtime.FuncForPC(addr).Name())[1:]
