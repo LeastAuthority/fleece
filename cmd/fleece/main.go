@@ -1,12 +1,13 @@
 package main
 
 import (
+	"github.com/spf13/cobra"
+
 	"github.com/leastauthority/fleece/cmd/flags"
 	"github.com/leastauthority/fleece/cmd/fleece/env"
 	"github.com/leastauthority/fleece/cmd/fleece/fuzz"
 	"github.com/leastauthority/fleece/cmd/fleece/triage"
 	"github.com/leastauthority/fleece/cmd/fleece/update"
-	"github.com/spf13/cobra"
 )
 
 func init() {

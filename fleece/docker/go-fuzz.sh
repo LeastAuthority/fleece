@@ -11,19 +11,23 @@ if [[ $# -lt 2 ]]; then
   echo "usage: entrypoint.sh <fuzzer package path> <fuzzer func name> [-b|--build] [-- [go-fuzz arg[, ...]]]"
 fi
 
+snake_case() {
+  echo $1 | sed 's,/,_,g'
+}
+
 pkg=$1
 shift
 name=$1
 shift
 # TODO: undo this hack.
 workdir=./fleece/workdirs/${name}
-bin=${pkg:2}-fuzz.zip
+bin=$(snake_case "${pkg:2}")-fuzz.zip
 bin_path=${workdir}/${bin}
 
 has_built=false
 build() {
-  mkdir -p ${workdir}
-  go-fuzz-build -o ${bin_path} ${pkg}
+  mkdir -p "${workdir}"
+  go-fuzz-build -o "${bin_path}" "${pkg}"
 }
 
 while [[ $# -gt 0 ]]; do
@@ -52,4 +56,4 @@ fi
 
 rest_args=$@
 
-go-fuzz -bin=${bin_path} -func=${name} -workdir=${workdir} $rest_args
+go-fuzz -bin="${bin_path}" -func="${name}" -workdir="${workdir}" $rest_args

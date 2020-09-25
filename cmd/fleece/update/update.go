@@ -1,14 +1,15 @@
 package update
 
 import (
-	"github.com/leastauthority/fleece/cmd/config"
-	"github.com/leastauthority/fleece/cmd/fleece/env"
-	"github.com/spf13/viper"
 	"os"
 	"os/exec"
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+
+	"github.com/leastauthority/fleece/cmd/config"
+	"github.com/leastauthority/fleece/cmd/fleece/env"
 )
 
 var (
@@ -19,19 +20,25 @@ var (
 		RunE:  runUpdate,
 	}
 
-	updateRepo bool
+	updateRepo, noUpdateCLI bool
 )
 
 func init() {
 	CmdUpdate.Flags().BoolVar(&updateRepo, "repo", false, "if true, updates repo files (restore bindata); prompts before overwrite)")
+	CmdUpdate.Flags().BoolVar(&noUpdateCLI, "no-cli", false, "if true, doesn't update the CLI before updating repo files (implies --repo)")
 }
 
 func runUpdate(cmd *cobra.Command, args []string) error {
-	if err := updateCLI(); err != nil {
-		return err
+	if !noUpdateCLI {
+		if err := updateCLI(); err != nil {
+			return err
+		}
 	}
-	if err := updateFiles(); err != nil {
-		return err
+
+	if updateRepo || noUpdateCLI {
+		if err := updateFiles(); err != nil {
+			return err
+		}
 	}
 	return nil
 }

@@ -8,7 +8,7 @@ RUN GO111MODULE=off go get -u github.com/dvyukov/go-fuzz/go-fuzz github.com/dvyu
 WORKDIR /tmp/fuzzing
 
 # NB: for use with docker-compose
-COPY ./go-fuzz.sh /go-fuzz.sh
+COPY go-fuzz.sh /go-fuzz.sh
 RUN chmod 755 /go-fuzz.sh
 
 CMD bash
