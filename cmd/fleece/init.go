@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/leastauthority/fleece/bindata"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -48,15 +47,14 @@ func runInit(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if err := bindata.RestoreAssets(outputRoot, "docker"); err != nil {
-		return err
-	}
-	if err := bindata.RestoreAssets(outputRoot, "fuzzing"); err != nil {
+	if err := env.RestoreBindata(outputRoot); err != nil {
 		return err
 	}
 
+	// TODO: flags for these
 	// NB: repo root is expected to be the parent of outputRoot.
 	viper.Set(config.RepoRoot, filepath.Dir(outputRoot))
+	viper.Set(config.OutputRoot, outputRoot)
 	if err := viper.SafeWriteConfig(); err != nil {
 		return err
 	}

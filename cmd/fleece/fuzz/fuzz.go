@@ -1,21 +1,22 @@
-package main
+package fuzz
 
 import (
 	"context"
 	"fmt"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"os"
 	"os/exec"
 	"os/signal"
 	"path/filepath"
 	"time"
 
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+
 	"github.com/leastauthority/fleece/cmd/config"
 )
 
 var (
-	cmdFuzz = &cobra.Command{
+	CmdFuzz = &cobra.Command{
 		Use:   "fuzz <pkg> <fuzz function>",
 		Short: "Run go-fuzz against a fuzz function",
 		Args:  cobra.ExactArgs(2),
@@ -27,8 +28,8 @@ var (
 )
 
 func init() {
-	cmdFuzz.Flags().BoolVarP(&buildBin, "build", "b", false, "if true, rebuilds test binary before running (default: false)")
-	cmdFuzz.Flags().IntVarP(&procs, "procs", "p", 1, "number of processors to use (passed to go-fuzz's -procs flag)")
+	CmdFuzz.Flags().BoolVarP(&buildBin, "build", "b", false, "if true, rebuilds test binary before running (default: false)")
+	CmdFuzz.Flags().IntVarP(&procs, "procs", "p", 1, "number of processors to use (passed to go-fuzz's -procs flag)")
 }
 
 func absRepoRoot() string {
@@ -47,11 +48,8 @@ func runFuzz(cmd *cobra.Command, args []string) error {
 		build = "-b"
 	}
 
-	// TODO: factor out
 	name := containerName(pkgPath, fuzzFuncName)
-	// TODO: factor out
-	// NB: guest workdir path.
-	workdir := filepath.Join(".", "fleece", "workdirs", fuzzFuncName)
+	workdir := getGuestWorkdir(fuzzFuncName)
 	runArgs := []string{
 		"--rm", "-d",
 		"--name", name,
@@ -60,7 +58,6 @@ func runFuzz(cmd *cobra.Command, args []string) error {
 		"go-fuzz", pkgPath, fuzzFuncName, build,
 		"--", "-procs", fmt.Sprint(procs), "-workdir", workdir,
 	}
-	//fmt.Printf("runArgs: %s\n", strings.Join(runArgs, " "))
 
 	if err := runContainer(repoRoot, runArgs); err != nil {
 		return err
@@ -110,6 +107,11 @@ func runFuzz(cmd *cobra.Command, args []string) error {
 
 func containerName(pkgPath, fuzzFuncName string) string {
 	return fmt.Sprintf("%s_%s", filepath.Base(pkgPath), fuzzFuncName)
+}
+
+// TODO: respect config
+func getGuestWorkdir(name string) string {
+	return filepath.Join(".", "fleece", "workdirs", name)
 }
 
 // TODO: move to docker package
