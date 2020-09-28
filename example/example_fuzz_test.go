@@ -34,7 +34,7 @@ func TestMain(m *testing.M) {
 
 func TestFuzzPanickyFunc(t *testing.T) {
 	_, panics, _ := fleece.MustNewCrasherIterator(env, FuzzPanickyFunc).
-		TestFailingLimit(t, crashLimit, fleece.SkipFilter(skipPattern))
+		TestFailingLimit(t, limit, fleece.SkipFilter(skipPattern))
 
 	require.Zero(t, panics)
 }
