@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/leastauthority/fleece/cmd/config"
+	"github.com/leastauthority/fleece/cmd/fleece/config"
 	"github.com/leastauthority/fleece/cmd/fleece/env"
 )
 
@@ -53,5 +53,5 @@ func updateCLI() error {
 }
 
 func updateFiles() error {
-	return env.RestoreBindata(viper.GetString(config.OutputRoot))
+	return env.RestoreBindata(viper.GetString(config.FleeceDir))
 }

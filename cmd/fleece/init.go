@@ -9,12 +9,13 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/leastauthority/fleece/cmd/config"
+	"github.com/leastauthority/fleece/cmd/fleece/config"
 	"github.com/leastauthority/fleece/cmd/fleece/env"
 )
 
 const (
 	defaultRoot = "fleece"
+	gitIgnoreLines = `*.zip`
 )
 
 var (
@@ -54,7 +55,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 	// TODO: flags for these
 	// NB: repo root is expected to be the parent of outputRoot.
 	viper.Set(config.RepoRoot, filepath.Dir(outputRoot))
-	viper.Set(config.OutputRoot, outputRoot)
+	viper.Set(config.FleeceDir, outputRoot)
 	if err := viper.SafeWriteConfig(); err != nil {
 		return err
 	}
@@ -78,8 +79,23 @@ func makeAllWorkdirsDir(outputRoot string) error {
 		return err
 	}
 
-	gitkeep := filepath.Join(workdirs, ".gitkeep")
+	writeGitKeep(workdirs)
+	writeGitIgnore(workdirs)
+
+	return nil
+}
+
+func writeGitKeep(dir string) error {
+	gitkeep := filepath.Join(dir, ".gitkeep")
 	if err := ioutil.WriteFile(gitkeep, nil, 0644); err != nil {
+		return err
+	}
+	return nil
+}
+
+func writeGitIgnore(dir string) error {
+	gitignore := filepath.Join(dir, ".gitignore")
+	if err := ioutil.WriteFile(gitignore, []byte(gitIgnoreLines), 0644); err != nil {
 		return err
 	}
 	return nil

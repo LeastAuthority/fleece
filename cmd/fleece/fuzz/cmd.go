@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/leastauthority/fleece/cmd/config"
+	"github.com/leastauthority/fleece/cmd/fleece/config"
 )
 
 var (
@@ -59,6 +59,7 @@ func runFuzz(cmd *cobra.Command, args []string) error {
 		"--", "-procs", fmt.Sprint(procs), "-workdir", workdir,
 	}
 
+	// TODO: docker engine api!
 	if err := runContainer(repoRoot, runArgs); err != nil {
 		return err
 	}
@@ -99,6 +100,7 @@ func runFuzz(cmd *cobra.Command, args []string) error {
 		}
 	}()
 
+	// TODO: docker engine api!
 	if err := stopContainer(name); err != nil {
 		return fmt.Errorf("error encountered while stopping container: %w", err)
 	}

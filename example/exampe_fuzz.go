@@ -3,20 +3,11 @@
 package example
 
 import (
-	"bytes"
-
 	"github.com/leastauthority/fleece/fuzzing"
 )
 
-func FuzzBuggyFunc(data []byte) int {
-	result, err := PanickyFunc(data)
-	if err != nil {
-		return fuzzing.FuzzNormal
-	}
+func FuzzPanickyFunc(data []byte) int {
+	PanickyFunc(data)
 
-	if !bytes.Equal(result, data) {
-		panic("input and result aren't equal!")
-	}
-
-	return 1
+	return fuzzing.FuzzNormal
 }

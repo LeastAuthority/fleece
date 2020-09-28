@@ -28,6 +28,7 @@ has_built=false
 build() {
   mkdir -p "${workdir}"
   go-fuzz-build -o "${bin_path}" "${pkg}"
+  echo "build done"
 }
 
 while [[ $# -gt 0 ]]; do

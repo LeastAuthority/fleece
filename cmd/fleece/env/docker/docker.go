@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/leastauthority/fleece/cmd/config"
+	"github.com/leastauthority/fleece/cmd/fleece/config"
 )
 
 var (
@@ -22,7 +22,7 @@ func init() {
 }
 
 func getDockerDir() string {
-	absoluteOutputRoot, err := filepath.Abs(viper.GetString(config.OutputRoot))
+	absoluteOutputRoot, err := filepath.Abs(viper.GetString(config.FleeceDir))
 	if err != nil {
 		panic(err)
 	}
