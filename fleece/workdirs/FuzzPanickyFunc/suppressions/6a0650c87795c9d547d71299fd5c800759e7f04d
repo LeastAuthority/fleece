@@ -1,0 +1,5 @@
+panic: input size: 9
+github.com/leastauthority/fleece/example.PanickyFunc
+github.com/leastauthority/fleece/example.FuzzPanickyFunc
+go-fuzz-dep.Main
+main.main
