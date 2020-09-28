@@ -12,9 +12,9 @@ type Env struct {
 	outputRoot string
 }
 
-func NewEnv(outputRoot string) *Env {
+func NewEnv(fleeceDir string) *Env {
 	return &Env{
-		outputRoot: outputRoot,
+		outputRoot: fleeceDir,
 	}
 }
 

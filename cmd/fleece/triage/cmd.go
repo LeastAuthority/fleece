@@ -18,13 +18,15 @@ var (
 		RunE:  runTriage,
 	}
 
-	crashLimit int
-	pattern    string
+	crashLimit  int
+	pattern     string
+	skipPattern string
 )
 
 func init() {
 	CmdTriage.Flags().IntVar(&crashLimit, "crash-limit", 1000, "maximun number of failing inputs before stopping and showing the summary")
 	//CmdTriage.Flags().StringVarP(&pattern, "pattern", "p", "", "string pattern to match in test output")
+	CmdTriage.Flags().StringVarP(&skipPattern, "skip", "s", "", "skips inputs that have recorded outputs which match the skip pattern")
 }
 
 func runTriage(cmd *cobra.Command, args []string) error {
@@ -44,6 +46,7 @@ func runTriage(cmd *cobra.Command, args []string) error {
 		pkgName, "-args",
 		"-crash-limit", fmt.Sprintf("%d", crashLimit),
 		"-fleece-dir", fleeceDir,
+		"-skip", skipPattern,
 	}
 	testCmd := exec.Command("go", testArgs...)
 	testCmd.Stdout = os.Stdout

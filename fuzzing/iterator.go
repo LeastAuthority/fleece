@@ -10,23 +10,31 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+type IterFilter func(next *Crasher) bool
+type IterFilters []IterFilter
+
 // CrasherIterator is an iterator for go-fuzz "crashers" located in the
 //	respective fuzz function's working directory.
 type CrasherIterator struct {
+	env        *Env
 	i          int
+	skipped    int
+	filters    IterFilters
 	infos      []os.FileInfo
 	fuzzFunc   Func
 	crasherDir string
 }
 
 // NewCrasherIteratorFor returns an iterator for crashers that lazily loads	their inputs and outputs.
-func NewCrasherIterator(env *Env, fuzzFunc Func) (*CrasherIterator, error) {
+func NewCrasherIterator(env *Env, fuzzFunc Func, filters ...IterFilter) (*CrasherIterator, error) {
 	crasherDir := env.GetCrasherDir(fuzzFunc)
 	crasherInfos, err := ioutil.ReadDir(crasherDir)
 	if err != nil {
 		return nil, err
 	}
 	return &CrasherIterator{
+		env:        env,
+		filters:    filters,
 		infos:      crasherInfos,
 		crasherDir: crasherDir,
 		fuzzFunc:   fuzzFunc,
@@ -49,9 +57,10 @@ func (iter *CrasherIterator) Next() (next *Crasher, done bool, err error) {
 	for !done {
 		info := iter.infos[iter.i]
 		name := info.Name()
+		iter.i++
+		done = iter.i == len(iter.infos)-1
+
 		if info.IsDir() || filepath.Ext(name) != "" {
-			iter.i++
-			done = iter.i == len(iter.infos)-1
 			continue
 		}
 
@@ -60,29 +69,38 @@ func (iter *CrasherIterator) Next() (next *Crasher, done bool, err error) {
 			return nil, done, err
 		}
 
-		//output, err := ioutil.ReadFile(filepath.Join(iter.crasherDir, name) + ".output")
-		//if err != nil {
-		//	return nil, done, err
-		//}
+		output, err := ioutil.ReadFile(filepath.Join(iter.crasherDir, name) + ".output")
+		if err != nil {
+			return nil, done, err
+		}
 
 		next = &Crasher{
 			Name:     name,
 			Input:    input,
-			//Output:   string(output),
+			Output:   string(output),
 			FuzzFunc: iter.fuzzFunc,
 		}
 
-		iter.i++
-		done = iter.i == len(iter.infos)-1
-		break
+		if iter.filters.Apply(next) {
+			break
+		}
 	}
 	return next, done, nil
 }
 
+func (filters IterFilters) Apply(next *Crasher) bool {
+	for _, filter := range filters {
+		if !filter(next) {
+			return false
+		}
+	}
+	return true
+}
+
 // TestFailingLimit tests each crasher's input against its respective fuzz
 //	function until it sees `limit` failing inputs
-func (iter CrasherIterator) TestFailingLimit(t *testing.T, env *Env, limit int) (_ *Crasher, panics int, total int) {
-	crasherIterator, err := NewCrasherIterator(env, iter.fuzzFunc)
+func (iter CrasherIterator) TestFailingLimit(t *testing.T, limit int, filters ...IterFilter) (_ *Crasher, panics int, total int) {
+	crasherIterator, err := NewCrasherIterator(iter.env, iter.fuzzFunc, filters...)
 	require.NoError(t, err)
 
 	// TODO: parallelize

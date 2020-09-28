@@ -10,7 +10,7 @@ import (
 type Crasher struct {
 	Name     string
 	Input    []byte
-	//Output   string
+	Output   string
 	FuzzFunc Func
 }
 
