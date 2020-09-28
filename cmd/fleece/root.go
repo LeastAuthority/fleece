@@ -27,7 +27,8 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $(pwd)/.fleece.yaml)")
+	// TODO: re-enable
+	//rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $(pwd)/.fleece.yaml)")
 }
 
 // initConfig reads in config file and ENV variables if set.

@@ -13,15 +13,10 @@ import (
 	"github.com/leastauthority/fleece/cmd/fleece/env"
 )
 
-const (
-	defaultRoot = "fleece"
-	gitIgnoreLines = `*.zip`
-)
+const gitIgnoreLines = `*.zip`
 
 var (
 	cmdInit = &cobra.Command{
-		// NB: disabled until hacks that break support are removed.
-		//Use:   "init [output-dir]",
 		Use:   "init",
 		Short: "Initialize fleece into a repo",
 		Long:  "Copies supporting files into output-dir (default: $(pwd)/fleece) and adds config file (default: .fleece.yaml)",
@@ -29,34 +24,29 @@ var (
 		RunE:  runInit,
 	}
 
-	initEnv bool
+	initEnv   bool
+	repoRoot  string
+	fleeceDir string
 )
 
 func init() {
 	cmdInit.Flags().BoolVarP(&initEnv, "env", "e", false, "if provided, also runs the equivalent of \"fleece env init\"")
+	cmdInit.Flags().StringVar(&repoRoot, "repo-root", ".", "path to the repo/module root relative to the config file (default: .)")
+	cmdInit.Flags().StringVar(&fleeceDir, "fleece-dir", "fleece", "path to the fleece dir relative to the repo/module root (default: fleece)")
 }
 
 func runInit(cmd *cobra.Command, args []string) error {
-	var outputRoot string
-	if len(args) > 0 {
-		outputRoot = args[0]
-	} else {
-		outputRoot = filepath.Join(".", defaultRoot)
-	}
-
-	if err := makeAllWorkdirsDir(outputRoot); err != nil {
-		return err
-	}
-
-	if err := env.RestoreBindata(outputRoot); err != nil {
-		return err
-	}
-
-	// TODO: flags for these
-	// NB: repo root is expected to be the parent of outputRoot.
-	viper.Set(config.RepoRoot, filepath.Dir(outputRoot))
-	viper.Set(config.FleeceDir, outputRoot)
+	viper.Set(config.RepoRoot, repoRoot)
+	viper.Set(config.FleeceDir, fleeceDir)
 	if err := viper.SafeWriteConfig(); err != nil {
+		return err
+	}
+
+	if err := makeAllWorkdirsDir(fleeceDir); err != nil {
+		return err
+	}
+
+	if err := env.RestoreBindata(fleeceDir); err != nil {
 		return err
 	}
 
