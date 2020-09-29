@@ -18,7 +18,7 @@ type IterFilters []IterFilter
 type CrasherIterator struct {
 	env        *Env
 	i          int
-	skipped    int
+	filtered   int
 	filters    IterFilters
 	infos      []os.FileInfo
 	fuzzFunc   Func
@@ -42,8 +42,8 @@ func NewCrasherIterator(env *Env, fuzzFunc Func, filters ...IterFilter) (*Crashe
 }
 
 // MustNewCrasherIterator returns an iterator for crashers but panics if an error occurs.
-func MustNewCrasherIterator(env *Env, fuzzFunc Func) *CrasherIterator {
-	iter, err := NewCrasherIterator(env, fuzzFunc)
+func MustNewCrasherIterator(env *Env, fuzzFunc Func, filters ...IterFilter) *CrasherIterator {
+	iter, err := NewCrasherIterator(env, fuzzFunc, filters...)
 	if err != nil {
 		panic(err)
 	}
@@ -84,31 +84,25 @@ func (iter *CrasherIterator) Next() (next *Crasher, done bool, err error) {
 		if iter.filters.Apply(next) {
 			break
 		}
+		iter.filtered++
 	}
 	return next, done, nil
 }
 
-func (filters IterFilters) Apply(next *Crasher) bool {
-	for _, filter := range filters {
-		if !filter(next) {
-			return false
-		}
-	}
-	return true
+func (iter CrasherIterator) Filtered() int {
+	return iter.filtered
 }
 
 // TestFailingLimit tests each crasher's input against its respective fuzz
 //	function until it sees `limit` failing inputs
-func (iter CrasherIterator) TestFailingLimit(t *testing.T, limit int, filters ...IterFilter) (_ *Crasher, panics int, total int) {
-	crasherIterator, err := NewCrasherIterator(iter.env, iter.fuzzFunc, filters...)
-	require.NoError(t, err)
-
+func (iter CrasherIterator) TestFailingLimit(t *testing.T, limit int) (_ *Crasher, panics int, total int) {
 	// TODO: parallelize
+	var err error
 	var done, didPanic bool
 	var firstCrasher, crasher *Crasher
 	var firstPanicMsg string
 	for panics < limit {
-		crasher, done, err = crasherIterator.Next()
+		crasher, done, err = iter.Next()
 		require.NoError(t, err)
 		if done {
 			break
@@ -137,7 +131,19 @@ func (iter CrasherIterator) TestFailingLimit(t *testing.T, limit int, filters ..
 
 	fmt.Printf("Crasher summary:\n===============\n")
 	fmt.Printf("- passing: %d\n", total-panics)
+	if iter.Filtered() > 0 {
+		fmt.Printf("- skipped: %d\n", iter.Filtered())
+	}
 	fmt.Printf("- failing: %d\n", panics)
 	fmt.Printf("- total tested: %d\n", total)
 	return firstCrasher, panics, total
+}
+
+func (filters IterFilters) Apply(next *Crasher) bool {
+	for _, filter := range filters {
+		if !filter(next) {
+			return false
+		}
+	}
+	return true
 }
