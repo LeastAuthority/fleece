@@ -10,9 +10,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type IterFilter func(next *Crasher) bool
-type IterFilters []IterFilter
-
 // CrasherIterator is an iterator for go-fuzz "crashers" located in the
 //	respective fuzz function's working directory.
 type CrasherIterator struct {
@@ -81,7 +78,7 @@ func (iter *CrasherIterator) Next() (next *Crasher, done bool, err error) {
 			FuzzFunc: iter.fuzzFunc,
 		}
 
-		if iter.filters.Apply(next) {
+		if iter.filters.Allows(next) {
 			break
 		}
 		iter.filtered++
@@ -124,9 +121,12 @@ func (iter CrasherIterator) TestFailingLimit(t *testing.T, limit int) (_ *Crashe
 
 	if firstCrasher != nil {
 		fmt.Printf("Current panicking crasher: %s\n", firstCrasher.Name)
-		fmt.Println("")
 		fmt.Printf("Current panic message:\n%s\n", firstPanicMsg)
 		fmt.Println("")
+		if FirstLine(firstPanicMsg) != FirstLine(firstCrasher.Output) {
+			fmt.Printf("Recorded (differs from current panic message):\n%s\n", firstCrasher.Output)
+			fmt.Println("")
+		}
 	}
 
 	fmt.Printf("Crasher summary:\n===============\n")
@@ -137,13 +137,4 @@ func (iter CrasherIterator) TestFailingLimit(t *testing.T, limit int) (_ *Crashe
 	fmt.Printf("- failing: %d\n", panics)
 	fmt.Printf("- total tested: %d\n", total)
 	return firstCrasher, panics, total
-}
-
-func (filters IterFilters) Apply(next *Crasher) bool {
-	for _, filter := range filters {
-		if !filter(next) {
-			return false
-		}
-	}
-	return true
 }
