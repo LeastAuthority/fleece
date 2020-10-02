@@ -8,13 +8,16 @@ import (
 const TimedOutPattern = "program hanged"
 const OutOfMemoryPattern = "out of memory"
 
-var (
-	SkipTimedOut    = SkipFilter(TimedOutPattern, "", false)
-	SkipOutOfMemory = SkipFilter(OutOfMemoryPattern, "", false)
-)
-
 type IterFilter func(next *Crasher) bool
 type IterFilters []IterFilter
+
+func SkipTimedOut(verbose bool) IterFilter {
+	return SkipFilter(TimedOutPattern, "", verbose)
+}
+
+func SkipOutOfMemory(verbose bool) IterFilter {
+	return SkipFilter(OutOfMemoryPattern, "", verbose)
+}
 
 func SkipFilter(patternStr string, delimiter string, verbose bool) IterFilter {
 	filtered := 0
