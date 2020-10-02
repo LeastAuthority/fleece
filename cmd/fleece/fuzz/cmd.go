@@ -1,18 +1,14 @@
 package fuzz
 
 import (
-	"context"
 	"fmt"
 	"os"
-	"os/exec"
 	"os/signal"
-	"path/filepath"
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 
-	"github.com/leastauthority/fleece/cmd/fleece/config"
+	"github.com/leastauthority/fleece/docker"
 )
 
 var (
@@ -32,65 +28,28 @@ func init() {
 	CmdFuzz.Flags().IntVarP(&procs, "procs", "p", 1, "number of processors to use (passed to go-fuzz's -procs flag)")
 }
 
-func absRepoRoot() string {
-	absoluteRepoRoot, err := filepath.Abs(viper.GetString(config.RepoRoot))
-	if err != nil {
-		panic(err)
-	}
-	return absoluteRepoRoot
-}
 func runFuzz(cmd *cobra.Command, args []string) error {
 	pkgPath := args[0]
 	fuzzFuncName := args[1]
-	repoRoot := absRepoRoot() //viper.GetString(config.RepoRoot)
-	var build string
-	if buildBin {
-		build = "-b"
-	}
 
-	name := containerName(pkgPath, fuzzFuncName)
-	workdir := getGuestWorkdir(fuzzFuncName)
-	runArgs := []string{
-		"--rm", "-d",
-		"--name", name,
-		"--entrypoint", "/go-fuzz.sh",
-		"-v", fmt.Sprintf("%s:/tmp/fuzzing", repoRoot),
-		"go-fuzz", pkgPath, fuzzFuncName, build,
-		"--", "-procs", fmt.Sprint(procs), "-workdir", workdir,
+	fuzzCfg := docker.FuzzConfig{
+		FuncName: fuzzFuncName,
+		Build:    buildBin,
+		Procs:    procs,
 	}
-
-	// TODO: docker engine api!
-	if err := runContainer(repoRoot, runArgs); err != nil {
+	// TODO: use docker engine api!
+	containerName, err := docker.RunGoFuzz(pkgPath, fuzzCfg)
+	if err != nil {
 		return err
 	}
 
 	sigC := make(chan os.Signal, 1)
 	signal.Notify(sigC, os.Interrupt, os.Kill)
 
-	ctx, cancel := context.WithCancel(context.Background())
 	// TODO: use docker engine api
-	go func() {
-		logArgs := []string{"logs", "-f", name}
-		logCmd := exec.Command("docker", logArgs...)
-		logCmd.Stdout = os.Stdout
-		logCmd.Stderr = os.Stderr
-		if err := logCmd.Start(); err != nil {
-			panic(err)
-		}
-		for {
-			select {
-			case <-ctx.Done():
-				if err := logCmd.Process.Kill(); err != nil {
-					panic(err)
-				}
-			default:
-			}
-		}
-	}()
-
-	// Wait for interrupt / kill signal
-	_ = <-sigC
-	cancel()
+	if err := docker.LogGoFuzz(pkgPath, fuzzCfg); err != nil {
+		return err
+	}
 
 	// NB: false hope that progress is happening
 	fmt.Printf("Shutting down gracefully...")
@@ -100,36 +59,9 @@ func runFuzz(cmd *cobra.Command, args []string) error {
 		}
 	}()
 
-	// TODO: docker engine api!
-	if err := stopContainer(name); err != nil {
+	// TODO: use docker engine api!
+	if err := docker.StopContainer(containerName); err != nil {
 		return fmt.Errorf("error encountered while stopping container: %w", err)
 	}
 	return nil
-}
-
-func containerName(pkgPath, fuzzFuncName string) string {
-	return fmt.Sprintf("%s_%s", filepath.Base(pkgPath), fuzzFuncName)
-}
-
-// TODO: respect config
-func getGuestWorkdir(name string) string {
-	return filepath.Join(".", "fleece", "workdirs", name)
-}
-
-// TODO: move to docker package
-func runContainer(cwd string, args []string) error {
-	args = append([]string{"run"}, args...)
-	dockerCmd := exec.Command("docker", args...)
-	dockerCmd.Dir = cwd
-	dockerCmd.Stdout = os.Stdout
-	dockerCmd.Stderr = os.Stderr
-	return dockerCmd.Run()
-}
-
-// TODO: move to docker package
-func stopContainer(name string) error {
-	cmd := exec.Command("docker", "stop", name)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
 }

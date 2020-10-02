@@ -7,13 +7,18 @@ import (
 	"github.com/spf13/viper"
 )
 
+func GetRepoRoot() (string, error) {
+	repoRoot, err := filepath.Abs(viper.GetString(RepoRoot))
+	if err != nil {
+		return "", fmt.Errorf("unable to get path to repo root: %w", err)
+	}
+	return repoRoot, nil
+}
+
 func GetFleeceDir() (string, error) {
-	fleeceDir, err := filepath.Abs(filepath.Join(
-		viper.GetString(RepoRoot),
-		viper.GetString(FleeceDir),
-	))
+	repoRoot, err := GetRepoRoot()
 	if err != nil {
 		return "", fmt.Errorf("unable to get path to fleece dir: %w", err)
 	}
-	return fleeceDir, nil
+	return filepath.Join(repoRoot, viper.GetString(FleeceDir)), nil
 }
