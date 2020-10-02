@@ -22,6 +22,10 @@ shift
 # TODO: this hack breaks support for global --config flag
 workdir=$(cat .fleece.yaml |grep fleece-dir|sed -E 's,.+:\s(.+),\1,')/workdirs/${name}
 bin=$(snake_case "${pkg:2}")-fuzz.zip
+if [[ pkg == "." || pkg == "./" ]]; then
+  bin="./dot-fuzz.zip"
+fi
+
 bin_path=${workdir}/${bin}
 
 has_built=false

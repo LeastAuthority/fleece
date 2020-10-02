@@ -10,6 +10,12 @@ import (
 )
 
 func ContainerName(pkgPath, fuzzFuncName string) string {
+	switch pkgPath {
+	case ".":
+		fallthrough
+	case "./":
+		pkgPath = "dot"
+	}
 	return fmt.Sprintf("%s_%s", filepath.Base(pkgPath), fuzzFuncName)
 }
 
