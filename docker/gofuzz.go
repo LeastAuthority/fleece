@@ -24,11 +24,7 @@ func RunGoFuzz(pkgPath string, cfg FuzzConfig) (string, error) {
 	}
 
 	name := ContainerName(pkgPath, cfg.FuncName)
-	workdir, err := GetGuestWorkdir(cfg.FuncName)
-	if err != nil {
-		return "", err
-	}
-
+	workdir := GetGuestWorkdir(cfg.FuncName)
 	cmd := []string{
 		pkgPath, cfg.FuncName, build,
 		"--", "-procs", fmt.Sprint(cfg.Procs), "-workdir", workdir,

@@ -19,12 +19,9 @@ func ContainerName(pkgPath, fuzzFuncName string) string {
 	return fmt.Sprintf("%s_%s", filepath.Base(pkgPath), fuzzFuncName)
 }
 
-func GetGuestWorkdir(name string) (string, error) {
-	fleeceDir, err := config.GetFleeceDir()
-	if err != nil {
-		return "", err
-	}
-	return filepath.Join(".", fleeceDir, "workdirs", name), nil
+func GetGuestWorkdir(name string) string {
+	fleeceDir := config.GetRelativeFleeceDir()
+	return filepath.Join(".", fleeceDir, "workdirs", name)
 }
 
 func RunContainer(cwd string, args []string) error {

@@ -22,3 +22,7 @@ func GetFleeceDir() (string, error) {
 	}
 	return filepath.Join(repoRoot, viper.GetString(FleeceDir)), nil
 }
+
+func GetRelativeFleeceDir() (string) {
+	return filepath.Join(viper.GetString(RepoRoot), viper.GetString(FleeceDir))
+}
