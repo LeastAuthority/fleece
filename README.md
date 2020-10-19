@@ -73,8 +73,8 @@ We're going to tackle these one at a time.
 It's possible that multiple inputs have a common bug.
 
 To debug, add a "triage test" which will run the crashing inputs back through the fuzz function that produced them to see if they're still crashing.
-This also has the benefit of acting as a regression test when combined with a with a simple assertion at all inputs are no longer crashing, and retaining the crashers in version control.
-Again, it's probably best to se the `gofuzz` build tag to exclude this code from normal builds and tests.
+This also has the benefit of acting as a regression test when combined with a with a simple assertion that all inputs are no longer crashing, and retaining the crashers in version control.
+Again, it's probably best to set the `gofuzz` build tag to exclude this code from normal builds and tests.
 
 Here's the triage test corresponding with our example above:
 _(NOTE: currently fleece expects the `crash-limit` flag to be defined on triage tests!)_
@@ -87,18 +87,44 @@ package example
 
 var crashLimit int
 
+var (
+  crashLimit           int
+  fleeceDir            string
+  skipPattern          string
+  skipPatternDelimiter string
+  safe, verbose        bool
+
+  env     *fleece.Env
+  filters []fleece.IterFilter
+)
+
 func init() {
-	flag.IntVar(&crashLimit, "crash-limit", 1000, "number of crashing inputs to test before stopping")
+  flag.IntVar(&crashLimit, "crash-limit", 1000, "number of crashing inputs to test before stopping")
+  flag.StringVar(&fleeceDir, "fleece-dir", "fleece", "path to fleece dir relative to repo/module root")
+  flag.StringVar(&skipPattern, "skip", "", "if provided, crashers with recorded outputs which match the pattern will be skipped")
+  flag.StringVar(&skipPatternDelimiter, "skip-delimiter", "", "delimiter used to split skip pattern")
+  flag.BoolVar(&safe, "safe", true, "\"if true, skips crashers with recorded outputs that timed-out or ran out of memory\"")
+  flag.BoolVar(&verbose, "verbose", false, "if true, logs each skip")
 }
 
 func TestMain(m *testing.M) {
-	flag.Parse()
-	os.Exit(m.Run())
+  flag.Parse()
+  env = fleece.NewEnv(fleeceDir)
+
+  skipFilter := fleece.SkipFilter(skipPattern, skipPatternDelimiter, verbose)
+  filters = []fleece.IterFilter{skipFilter}
+  if safe {
+    filters = append(filters,
+      fleece.SkipTimedOut(verbose),
+      fleece.SkipOutOfMemory(verbose))
+  }
+
+  os.Exit(m.Run())
 }
 
-func TestFuzzBuggyFunc(t *testing.T) {
+func TestFuzzPanickyFunc(t *testing.T) {
 	_, panics, _ := fuzzing.
-		MustNewCrasherIterator(FuzzBuggyFunc).
+		MustNewCrasherIterator(env, FuzzPanickyFunc, filters...).
 		TestFailingLimit(t, crashLimit)
 
 	require.Zero(t, panics)
