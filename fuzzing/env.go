@@ -9,17 +9,28 @@ import (
 type Func func(data []byte) int
 
 type Env struct {
-	outputRoot string
+	FleeceDir string
 }
 
 func NewEnv(fleeceDir string) *Env {
 	return &Env{
-		outputRoot: fleeceDir,
+		FleeceDir: fleeceDir,
 	}
 }
 
+func NewLocalEnv() (*Env, error) {
+	fleeceDir, err := config.GetFleeceDir()
+	if err != nil {
+		return nil, err
+	}
+
+	return &Env{
+		FleeceDir: fleeceDir,
+	}, nil
+}
+
 func (e *Env) GetWorkdirs() string {
-	return filepath.Join(e.outputRoot, "workdirs")
+	return filepath.Join(e.FleeceDir, "workdirs")
 }
 
 func (e *Env) GetCrasherDir(fuzzFunc Func) string {

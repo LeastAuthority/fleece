@@ -56,7 +56,7 @@ func runTriage(cmd *cobra.Command, args []string) error {
 		"-skip-delimiter", skipPatternDelimiter,
 	}
 	if !safe {
-		testArgs = append(testArgs, "--safe", "false")
+		testArgs = append(testArgs, "-safe=false")
 	}
 	if verbose {
 		testArgs = append(testArgs, "-verbose")
