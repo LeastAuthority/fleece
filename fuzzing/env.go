@@ -4,6 +4,8 @@ import (
 	"path/filepath"
 	"reflect"
 	"runtime"
+
+	"github.com/leastauthority/fleece/cmd/fleece/config"
 )
 
 type Func func(data []byte) int
