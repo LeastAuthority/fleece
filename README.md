@@ -85,6 +85,11 @@ _(NOTE: currently fleece expects the `crash-limit` flag to be defined on triage 
 
 package example
 
+import (
+    "flag"
+    fleece "github.com/leastauthority/fleece/fuzzing"
+)
+
 var crashLimit int
 
 var (
@@ -122,9 +127,9 @@ func TestMain(m *testing.M) {
   os.Exit(m.Run())
 }
 
-func TestFuzzPanickyFunc(t *testing.T) {
+func TestFuzzBuggyFunc(t *testing.T) {
 	_, panics, _ := fuzzing.
-		MustNewCrasherIterator(env, FuzzPanickyFunc, filters...).
+		MustNewCrasherIterator(env, FuzzBuggyFunc, filters...).
 		TestFailingLimit(t, crashLimit)
 
 	require.Zero(t, panics)
