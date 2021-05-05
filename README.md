@@ -87,10 +87,10 @@ package example
 
 import (
     "flag"
+    "os"
+
     fleece "github.com/leastauthority/fleece/fuzzing"
 )
-
-var crashLimit int
 
 var (
   crashLimit           int
@@ -128,7 +128,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestFuzzBuggyFunc(t *testing.T) {
-	_, panics, _ := fuzzing.
+	_, panics, _ := fleece.
 		MustNewCrasherIterator(env, FuzzBuggyFunc, filters...).
 		TestFailingLimit(t, crashLimit)
 

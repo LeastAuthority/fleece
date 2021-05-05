@@ -46,9 +46,9 @@ func TestMain(m *testing.M) {
   os.Exit(m.Run())
 }
 
-func TestFuzzPanickyFunc(t *testing.T) {
-	_, panics, _ := fleece.MustNewCrasherIterator(env, FuzzPanickyFunc, filters...).
-		TestFailingLimit(t, limit)
+func TestFuzzBuggyFunc(t *testing.T) {
+	_, panics, _ := fleece.MustNewCrasherIterator(env, FuzzBuggyFunc, filters...).
+		TestFailingLimit(t, crashLimit)
 
 	require.Zero(t, panics)
 }

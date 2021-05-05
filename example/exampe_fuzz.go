@@ -6,8 +6,8 @@ import (
 	"github.com/leastauthority/fleece/fuzzing"
 )
 
-func FuzzPanickyFunc(data []byte) int {
-	PanickyFunc(data)
+func FuzzBuggyFunc(data []byte) int {
+	BuggyFunc(data)
 
 	return fuzzing.FuzzNormal
 }
